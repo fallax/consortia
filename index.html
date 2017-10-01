@@ -5,11 +5,8 @@
 <meta name="viewport" content="width=device-width">
 <title>Consortia</title>
 <script
-  src="https://code.jquery.com/jquery-3.2.1.min.js"
-  crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/html5sortable/0.6.3/html.sortable.min.js"
+  src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
   crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js">
 </script>
@@ -19,6 +16,8 @@
 body
 {
 	font-family: Helvetica, Arial, sans;
+	display: flex;
+	flex-direction: row;
 	margin: 0;
 	overflow: hidden;
 	position: fixed;
@@ -29,10 +28,8 @@ body
 	padding: 0;
 	max-width: 350px;
 	margin: 0;
-	display: flex;
-	flex-wrap: wrap;
 }
-.item, .my-placeholder
+.item
 {
 	width: 50px;
 	height: 32px;
@@ -60,16 +57,17 @@ button
 #fail, #next
 {
 	position: fixed;
+	width: 100%;
+	height: 100%;
 	background: rgba(0,0,0,0.5);
 	text-align: center;
 	color: white;
 	font-weight: bold;
 	font-size: 30px;
-	width: 100%;
-	padding: 24px 0;
 }
 </style>
 <script>
+
 var player = {
 	itemCounts: [5, 15, 10, 25],
 	bests: [15, 30, 20, 60],
@@ -138,14 +136,12 @@ function nextLevel()
 	function setupGame()
 	{
 		var list = document.getElementById("main");
-		/*var sortoptions = {
+		var sortoptions = {
 			delay: 0,
 			animation: 150,
 			onUpdate: checkLevel
 		};
 		Sortable.create(list, sortoptions);
-		*/
-		
 		setInterval(function(){ 
 			updateDisplay();
 		}, 25);
@@ -174,10 +170,8 @@ function nextLevel()
 			item.html("" + (number + 1));
 			$('#main').append(item);
 		}
-
-		sortable('.main', { placeholderClass: 'my-placeholder' })[0].addEventListener('sortstop', checkLevel);
-
 	}
+
 	function time()
 	{
 		return Date.now();
@@ -241,7 +235,7 @@ function nextLevel()
 $(function ()
 {
 	setupGame();
-	setupLevel();
+	setupLevel(5);
 }
 );
 </script>
@@ -257,7 +251,7 @@ Too slow!
 <br>
 <button onclick="replay();">Try again</button>
 </div>
-<ul id="main" class="main">
+<ul id="main">
 
 </ul>
 <div id="other">
