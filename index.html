@@ -245,8 +245,6 @@ function nextLevel()
 			if (remaining > 0)
 			{
 				$('#remaining').html(Math.round(remaining));
-				var ratio = ((0.0 + level.duration - remaining) / (0.0 + level.duration)) * $(document).width();
-				$('#time').css("width", ratio);
 				if (remaining < 5)
 				{
 					$('#remaining').css("color", "red");
@@ -283,6 +281,9 @@ function nextLevel()
 			level.startTime = time();
 		}
 		$('#time').css("opacity", 1);
+		$('#time').animate({
+			width: "100%"
+		}, level.duration * 1000, "linear");
 	}
 
 	function checkLevel()
@@ -310,6 +311,7 @@ function nextLevel()
 		if (level.complete)
 		{
 			$('#main li').addClass("pop");
+			$('#time').stop(true, false);
 			$('#time').animate({
 				"opacity": "0"
 			}, 500);
