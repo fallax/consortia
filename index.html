@@ -30,6 +30,14 @@ body
   user-select: none;
 
 }
+#time
+{
+	background: black;
+	position: fixed;
+	width: 0;
+	height: 100%;
+	z-index:-99;
+}
 #main
 {
 	list-style-type: none;
@@ -48,7 +56,7 @@ body
 	text-align: center;
 	border-radius: 10px;
 }
-	@media screen and (min-width:720px){
+@media screen and (min-width:720px){
 #main
 {
 	max-width: 700px;
@@ -83,7 +91,6 @@ button
 {
 	position: fixed;
 	width: 100%;
-	height: 100%;
 	background: rgba(0,0,0,0.5);
 	text-align: center;
 	color: white;
@@ -92,8 +99,7 @@ button
 }
 .sortable-ghost
 {
-	background: white !important;
-	color: white !important;
+	opacity: 0;
 }
 </style>
 <script>
@@ -174,7 +180,7 @@ function nextLevel()
 		Sortable.create(list, sortoptions);
 		setInterval(function(){ 
 			updateDisplay();
-		}, 25);
+		}, 10);
 	}
 
 
@@ -211,15 +217,34 @@ function nextLevel()
 	{
 		if (level.started && !level.complete)
 		{
-			var remaining = Math.round(level.duration - ((time() - level.startTime)/1000));
+			var remaining = level.duration - ((time() - level.startTime)/1000);
 			if (remaining > 0)
 			{
-				$('#remaining').html(remaining);
+				$('#remaining').html(Math.round(remaining));
+				var ratio = ((0.0 + level.duration - remaining) / (0.0 + level.duration)) * $(document).width();
+				$('#time').css("width", ratio);
+				if (remaining < 5)
+				{
+					$('#remaining').css("color", "red");
+				}
+				else
+				{
+					$('#remaining').css("color", "black");
+				}
 			}
 			else
 			{
 				$('#remaining').html(0);
+				$('#time').css("width", "100%");
+				$('#remaining').css("color", "gray");
 				$('#fail').css("display", "block");
+			}
+		}
+		else
+		{
+			if (!level.started)
+			{
+				$('#time').css("width", 0);
 			}
 		}
 	}
@@ -265,12 +290,14 @@ function nextLevel()
 $(function ()
 {
 	setupGame();
-	setupLevel(5);
+	setupLevel();
 }
 );
 </script>
 </head>
 <body>
+<div id="time">
+</div>
 <div id="next" style="display: none">
 Well done!
 <br>
