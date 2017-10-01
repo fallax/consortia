@@ -65,6 +65,11 @@ button
 	font-weight: bold;
 	font-size: 30px;
 }
+.sortable-ghost
+{
+	background: white !important;
+	color: white !important;
+}
 </style>
 <script>
 
@@ -138,8 +143,8 @@ function nextLevel()
 		var list = document.getElementById("main");
 		var sortoptions = {
 			delay: 0,
-			animation: 150,
-			onUpdate: checkLevel
+			onUpdate: checkLevel,
+			animate: 50
 		};
 		Sortable.create(list, sortoptions);
 		setInterval(function(){ 
