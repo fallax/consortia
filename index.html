@@ -1,0 +1,239 @@
+<html>
+<head>
+<title>Consortia</title>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
+  crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.4/chroma.min.js">
+</script>
+<style>
+body
+{
+	font-family: Helvetica, Arial, sans;
+	display: flex;
+	flex-direction: row;
+}
+#main
+{
+	list-style-type: none;
+	padding: 0;
+}
+.item
+{
+	width: 300px;
+	height: 40px;
+	border: 1px solid #aaa;
+	margin: 15px;
+	font-size: 32px;
+	padding: 8px;
+}
+#remaining
+{
+	font-size: 72px;
+}
+#other
+{
+	position:fixed;
+	margin-left: 400px;
+}
+</style>
+<script>
+
+var player = {
+	itemCounts: [5, 15, 10, 25],
+	bests: [15, 30, 20, 60],
+	difficulties: [0.9, 0.8, 1.5],
+	currentLevel: 0,
+	currentDifficulty :0
+};
+
+	level = {
+		count: player.itemCounts[player.currentLevel],
+		started: false,
+		complete: false,
+		startTime: null,
+		duration: Math.round(player.bests[player.currentLevel] * player.difficulties[player.currentDifficulty])
+	};
+
+// Fisher-Yates Shuffle
+function shuffle (array) {
+var i = 0
+  , j = 0
+  , temp = null
+
+for (i = array.length - 1; i > 0; i -= 1) {
+  j = Math.floor(Math.random() * (i + 1))
+  temp = array[i]
+  array[i] = array[j]
+  array[j] = temp
+}
+}
+
+function replay()
+{
+	$('#fail').css("display", "none");
+	level = {
+		count: player.itemCounts[player.currentLevel],
+		started: false,
+		complete: false,
+		startTime: null,
+		duration: Math.round(player.bests[player.currentLevel] * player.difficulties[player.currentDifficulty])
+	};
+
+	setupLevel();
+};
+
+
+function nextLevel()
+{
+	$('#next').css("display", "none");
+
+	// go on to next level
+
+	player.currentLevel = (player.currentLevel + 1) % player.itemCounts.length;
+	player.currentDifficulty = (player.currentDifficulty + 1) % player.difficulties.length;
+
+	level = {
+		count: player.itemCounts[player.currentLevel],
+		started: false,
+		complete: false,
+		startTime: null,
+		duration: Math.round(player.bests[player.currentLevel] * player.difficulties[player.currentDifficulty])
+	};
+
+	setupLevel();
+}
+
+	function setupGame()
+	{
+		var list = document.getElementById("main");
+		var sortoptions = {
+			delay: 0,
+			animation: 150,
+			onUpdate: checkLevel
+		};
+		Sortable.create(list, sortoptions);
+		setInterval(function(){ 
+			updateDisplay();
+		}, 25);
+	}
+
+
+	function setupLevel()
+	{
+		var order = [];
+		for (var i = 0; i < level.count; i++)
+		{
+			order.push(i);
+		}
+
+		shuffle(order);
+
+		$('#remaining').html(level.duration);
+		$('#main').html("");
+		for (var i = 0; i < level.count; i++)
+		{
+			var item = $("<li class='item'></li>");
+			var number = order[i];
+			var hue = ((0.0 + number)/level.count) * 210;
+			item.css("background-color", chroma.hcl(hue, 100, 100));
+			item.attr("id", "i" + number);
+			item.html("" + (number + 1));
+			$('#main').append(item);
+		}
+	}
+
+function time()
+	{
+		return Date.now();
+	}
+
+	function updateDisplay()
+	{
+		if (level.started && !level.complete)
+		{
+			var remaining = Math.round(level.duration - ((time() - level.startTime)/1000));
+			if (remaining > 0)
+			{
+				$('#remaining').html(remaining);
+			}
+			else
+			{
+				$('#remaining').html(0);
+				$('#fail').css("display", "block");
+			}
+		}
+	}
+
+	function checkLevel()
+	{
+		// if the game isn't started, start the timer
+		if (!level.started)
+		{
+			level.started = true;
+			level.startTime = time();
+			checkLevel();
+		}
+		else
+		{
+			// check whether the list is ordered
+			var items = $('#main').children();
+			var highest = -1;
+			level.complete = true;
+			items.each(function ()
+			{
+				var number = parseInt($(this).attr("id").substr(1));
+				if (number > highest)
+				{
+					highest = number;
+				}
+				else
+				{
+					level.complete = false;
+				}
+			})
+			// level is complete
+			if (level.complete)
+			{
+				$('#next').css("display", "block");
+				level.finshTime = time();
+				player.bests[player.currentLevel] = level.finshTime - level.startTime;
+			}
+		}
+	}
+
+$(function ()
+{
+	setupGame();
+	setupLevel(5);
+}
+);
+</script>
+</head>
+<body>
+<ul id="main">
+
+</ul>
+<div id="other">
+<div id="stats">
+<span id="complete">
+</span>
+<span id="remaining" >
+</span>
+<div id="next" style="display: none">
+Well done!
+<button onclick="nextLevel();">Next level</button>
+</div>
+<div id="fail" style="display: none">
+Too slow!
+<button onclick="replay();">Try again</button>
+</div>
+</div>
+<ul id="working">
+</ul>
+</div>
+</body>
+</html>
