@@ -171,7 +171,7 @@ function nextLevel()
 		}
 	}
 
-function time()
+	function time()
 	{
 		return Date.now();
 	}
@@ -225,7 +225,8 @@ function time()
 			{
 				$('#next').css("display", "block");
 				level.finshTime = time();
-				player.bests[player.currentLevel] = (player.bests[player.currentLevel] + ((level.finshTime - level.startTime) / 1000) / 2);
+				var newtime = player.bests[player.currentLevel]/2 + ((0.0 + level.finshTime - level.startTime) / 1000)/2;
+				player.bests[player.currentLevel] = newtime;
 			}
 		}
 	}
