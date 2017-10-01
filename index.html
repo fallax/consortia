@@ -74,10 +74,6 @@ body
 	border-radius: 20px;
 }
 }
-#remaining
-{
-	font-size: 72px;
-}
 #other
 {
 	position:fixed;
@@ -212,7 +208,6 @@ function nextLevel()
 
 		shuffle(order);
 
-		$('#remaining').html(level.duration);
 		$('#main').html("");
 		for (var i = 0; i < level.count; i++)
 		{
@@ -244,21 +239,14 @@ function nextLevel()
 			var remaining = level.duration - ((time() - level.startTime)/1000);
 			if (remaining > 0)
 			{
-				$('#remaining').html(Math.round(remaining));
-				if (remaining < 5)
-				{
-					$('#remaining').css("color", "red");
-				}
-				else
-				{
-					$('#remaining').css("color", "black");
-				}
 			}
 			else
 			{
-				$('#remaining').html(0);
 				$('#time').css("width", "100%");
-				$('#remaining').css("color", "gray");
+				$('#time').stop(true, false);
+				$('#time').animate({
+					"opacity": "0"
+				}, 500);
 				$('#main li').addClass("drop");
 				$('#fail').css("display", "block");
 			}
@@ -361,8 +349,6 @@ Too slow!
 <div id="other">
 <div id="stats">
 <span id="complete">
-</span>
-<span id="remaining" >
 </span>
 </div>
 <ul id="working">
