@@ -97,6 +97,7 @@ button
 	font-weight: bold;
 	font-size: 30px;
 	padding-top: 100px;
+	z-index: 999;
 }
 .sortable-ghost
 {
@@ -118,8 +119,8 @@ button
 <script>
 
 var player = {
-	itemCounts: [5, 15, 10, 24],
-	bests: [10, 20, 15, 40],
+	itemCounts: [8, 16, 12, 20],
+	bests: [10, 20, 15, 45],
 	difficulties: [0.9, 0.8, 1],
 	currentLevel: 0,
 	currentDifficulty :0
@@ -249,6 +250,7 @@ function nextLevel()
 				}, 500);
 				$('#main li').addClass("drop");
 				$('#fail').css("display", "block");
+				level.failed = true;
 			}
 		}
 		else
@@ -276,12 +278,18 @@ function nextLevel()
 
 	function checkLevel()
 	{
+		if (level.failed)
+		{
+			return;
+		}
+
 		// ensure the level has started properly
 		startLevel();		
 
 		// check whether the list is ordered
 		var items = $('#main').children();
 		var highest = -1;
+
 		level.complete = true;
 		items.each(function ()
 		{
