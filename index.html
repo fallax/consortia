@@ -177,6 +177,7 @@ function nextLevel()
 		var list = document.getElementById("main");
 		var sortoptions = {
 			delay: 0,
+			onStart: startLevel,
 			onUpdate: checkLevel,
 			animate: 50
 		};
@@ -252,45 +253,49 @@ function nextLevel()
 		}
 	}
 
-	function checkLevel()
+	function startLevel()
 	{
 		// if the game isn't started, start the timer
 		if (!level.started)
 		{
 			level.started = true;
 			level.startTime = time();
-			checkLevel();
 		}
-		else
-		{
-			// check whether the list is ordered
-			var items = $('#main').children();
-			var highest = -1;
-			level.complete = true;
-			items.each(function ()
-			{
-				var number = parseInt($(this).attr("id").substr(1));
-				if (number > highest)
-				{
-					highest = number;
-				}
-				else
-				{
-					level.complete = false;
-				}
-			})
-			// level is complete
-			if (level.complete)
-			{
-				$('#next').css("display", "block");
-				level.finishTime = time();
-				var newtime = player.bests[player.currentLevel]/2 + ((0.0 + level.finishTime - level.startTime) / 1000)/2;
-				player.bests[player.currentLevel] = newtime;
+	}
 
-				$('#itemcount').html(level.count);
-				$('#completiontime').html(((level.finishTime - level.startTime)/1000).toFixed(1));
+	function checkLevel()
+	{
+		// ensure the level has started properly
+		startLevel();		
+
+		// check whether the list is ordered
+		var items = $('#main').children();
+		var highest = -1;
+		level.complete = true;
+		items.each(function ()
+		{
+			var number = parseInt($(this).attr("id").substr(1));
+			if (number > highest)
+			{
+				highest = number;
 			}
+			else
+			{
+				level.complete = false;
+			}
+		})
+		// level is complete
+		if (level.complete)
+		{
+			$('#next').css("display", "block");
+			level.finishTime = time();
+			var newtime = player.bests[player.currentLevel]/2 + ((0.0 + level.finishTime - level.startTime) / 1000)/2;
+			player.bests[player.currentLevel] = newtime;
+
+			$('#itemcount').html(level.count);
+			$('#completiontime').html(((level.finishTime - level.startTime)/1000).toFixed(1));
 		}
+		
 	}
 
 $(function ()
