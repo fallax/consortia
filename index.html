@@ -86,6 +86,8 @@ body
 button
 {
 	font-size: 32px;
+	padding: 32px;
+	margin-top: 32px;
 }
 #fail, #next
 {
@@ -281,9 +283,12 @@ function nextLevel()
 			if (level.complete)
 			{
 				$('#next').css("display", "block");
-				level.finshTime = time();
-				var newtime = player.bests[player.currentLevel]/2 + ((0.0 + level.finshTime - level.startTime) / 1000)/2;
+				level.finishTime = time();
+				var newtime = player.bests[player.currentLevel]/2 + ((0.0 + level.finishTime - level.startTime) / 1000)/2;
 				player.bests[player.currentLevel] = newtime;
+
+				$('#itemcount').html(level.count);
+				$('#completiontime').html(((level.finishTime - level.startTime)/1000).toFixed(1));
 			}
 		}
 	}
@@ -301,6 +306,8 @@ $(function ()
 </div>
 <div id="next" style="display: none">
 Well done!
+<br>
+You sorted <span id="itemcount"></span> numbers in <span id="completiontime"></span> seconds. 
 <br>
 <button onclick="nextLevel();">Next level</button>
 </div>
