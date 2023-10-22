@@ -42,7 +42,6 @@
         }
 
         .book {
-            padding-left: 12px;
             font-size: 16px;
             background-color: darkred;
             color: white;
@@ -53,7 +52,7 @@
 
         .author,
         .title {
-            margin: 0 24px;
+            margin: 0 12px;
         }
 
         .selected {
@@ -990,8 +989,21 @@
             }
         }
 
+        var jumble = [];
+        for (var i = 0; i < 11; i++)
+        {
+            var jumbler = [0, 1, 2, 3, 4, 5, 6];
+            shuffle(jumbler);
+            for (var j = 0; j < 7; j++)
+            {
+                jumble.push((i*7) + jumbler[j]);
+            }
+        }
+
         function pick(list, i) {
-            return list[i % list.length];
+            var offset = jumble[i % 77];
+
+            return list[offset % list.length];
         }
 
         function titleCase(str) {
@@ -1020,6 +1032,9 @@
 
         var reserve = [];
         var books = [];
+        var hues = [120, 143, 166, 206, 270, 300, 324, 348, 30, 90];
+        var widths = [300, 314, 322, 330, 339, 351, 362, 373, 381, 389, 400];
+        var heights = [40, 46, 52, 61, 69, 74, 81];
 
         function drawBook(book) {
             var authorEl = document.createElement("div");
@@ -1067,11 +1082,11 @@
                 var thisBook = {
                     "author": given + " " + family,
                     title: pick(titles, i),
-                    "hue": Math.random() * 360,
+                    "hue": pick(hues, i),
                     "order": Math.floor(Math.random() * 2),
                     "layout": Math.floor(Math.random() * 4),
-                    width: (300 + (Math.random() * 100)),
-                    height: (30 + (Math.random() * 30))
+                    width: pick(widths, i),
+                    height: pick(heights, i)
                 };
                 reserve.push(
                     thisBook
@@ -1234,6 +1249,11 @@
                     gp.buttons.length, gp.axes.length);
             });
 
+            shuffle(widths);
+            shuffle(heights);
+            shuffle(hues);
+            shuffle(titles);
+
             shuffle(names["given-names"].negative);
             names["given-names"].negative = names["given-names"].negative.map((el) => titleCase(el));
             shuffle(names["given-names"].standard);
@@ -1251,7 +1271,7 @@
             selectedIndex = 0;
 
             createBooks();
-            books = reserve.splice(0, 10);
+            books = reserve.splice(0, 25);
             drawBooks();
             draw();
             highlightSelected();
