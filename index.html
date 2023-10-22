@@ -1019,6 +1019,7 @@
         }
 
         var viewheight = window.innerHeight;
+        var viewCentre = window.innerHeight / 2;
         var level;
         var shelf;
         var hand;
@@ -1106,6 +1107,7 @@
 
         var buttonTimeout = 100;
         var buttonLastPressed = {};
+        
 
         function draw() {
 
@@ -1134,7 +1136,8 @@
                 }
             }
 
-            var centre = viewheight / 2;
+            viewheight = window.innerHeight;
+            viewCentre = viewheight / 2;
 
             var bookCentre = books.slice(0, selectedIndex).reduce((prev, book) => prev + book.height, 0);
 
@@ -1159,7 +1162,7 @@
             }
 
             // try and seek towards the right position
-            var target = centre - bookCentre;
+            var target = viewCentre - bookCentre;
 
             cameraVelocity = ((target - camerapos) * 0.4);
 
@@ -1168,7 +1171,7 @@
 
             if (hand) { handheight = handheight + ((200 - handheight) * 0.3); } else { handheight = 0; }
             var handScale = 1 + ((handheight / 150) * 0.2);
-            handEl.style.transform = "translate(" + handheight + "px, " + (centre - 50) + "px) scale(" + handScale + ")";
+            handEl.style.transform = "translate(" + handheight + "px, " + (viewCentre - 50) + "px) scale(" + handScale + ")";
         }
 
         function highlightSelected() {
@@ -1292,6 +1295,21 @@
                     default:
                         console.log(e.keyCode);
                         break;
+                }
+            });
+
+            window.addEventListener('click', function (e) {
+                if (e.clientY < viewCentre - 50)
+                {
+                    down();
+                }
+                else if (e.clientY > viewCentre + 50)
+                {
+                    up();
+                }
+                else
+                {
+                    grab();
                 }
             });
 
