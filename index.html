@@ -25,13 +25,14 @@
             background-color: #101530;
         }
 
-        #congratulations {
+        #alert {
             position: fixed;
-            height: 600px;
+            top: 0px;
+            height: 100px;
             width: 400px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
-            font-size: 60px;
+            font-size: 32px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -97,6 +98,128 @@
         }
     </style>
     <script>
+
+        var achievements = [
+            {
+                "title": "Sorted by Author",
+                "reward": "+10 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].author.split(" ")[1] > books[i + 1].author.split(" ")[1]) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 10);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Size",
+                "reward": "+2 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].width > books[i + 1].width) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 2);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Size Descending",
+                "reward": "+2 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].width < books[i + 1].width) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 2);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Thickness",
+                "reward": "+5 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].height > books[i + 1].height) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 2);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Thickness Descending",
+                "reward": "+5 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].height < books[i + 1].height) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 5);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Hue",
+                "reward": "+10 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].hue > books[i + 1].hue) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 10);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Hue Descending",
+                "reward": "+10 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].hue < books[i + 1].hue) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 10);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            }
+        ];
 
         var titles = [
             "Selected Verse",
@@ -1069,25 +1192,24 @@
                             highlightSelected();
 
                             // Check if it is sorted!
-                            var sorted = true;
-                            for (var i = 0; i < books.length - 2; i++) {
-                                if (books[i].author.split(" ")[1] > books[i + 1].author.split(" ")[1]) {
-                                    sorted = false;
-                                }
-                            }
-                            if (sorted) {
-                                console.log("sorted");
+                            for (var achievement of achievements)
+                            {
+                                if (achievement.check())
+                                {
+                                    console.log("sorted!");
+                                    console.log("Got "+ achievement.title);
 
-                                var congratsEl = document.getElementById("congratulations");
-                                congratsEl.style.visibility = "visible";
-                                setTimeout(() => {
-                                    document.getElementById("congratulations").style.visibility = "hidden";
-                                    var newbooks = reserve.splice(0, 10);
-                                    newbooks.forEach((book) => { books.push(book); });
-                                    drawBooks();
-                                    draw();
-                                    highlightSelected();
-                                }, 5000);
+                                    var congratsEl = document.getElementById("alert");
+                                    congratsEl.style.visibility = "visible";
+                                    congratsEl.innerText = achievement.title + ": " + achievement.reward;
+                                    achievement.finished();
+                                        drawBooks();
+                                        draw();
+                                        highlightSelected();
+                                    setTimeout(() => {
+                                        document.getElementById("alert").style.visibility = "hidden";
+                                    }, 5000);
+                                }
                             }
                         }
                         else {
@@ -1112,10 +1234,8 @@
 </head>
 
 <body onload="start()">
-    <div id="congratulations">
-        <p>good job!</p>
-        <p>your prize is:</p>
-        <p>more books</p>
+    <div id="alert">
+        <p>Sorted by author: +5 books</p>
     </div>
     <div id="hand">
 
