@@ -1,365 +1,1130 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
-<title>Consortia</title>
-<script
-  src="https://code.jquery.com/jquery-3.2.1.min.js"
-  crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js">
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.4/chroma.min.js">
-</script>
-<style>
-body
-{
-	font-family: Helvetica, Arial, sans;
-	display: flex;
-	flex-direction: row;
-	margin: 0;
-	overflow: hidden;
-	position: fixed;
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Consortia</title>
+    <script src="chroma.min.js"></script>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans;
+            display: flex;
+            flex-direction: row;
+            margin: 0;
+            overflow: hidden;
+            position: fixed;
 
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
 
-}
-#time
-{
-	background: black;
-	position: fixed;
-	width: 0;
-	height: 100%;
-	z-index:-99;
-}
-#main
-{
-	list-style-type: none;
-	padding: 0;
-	max-width: 350px;
-	margin: 0;
-}
-.item
-{
-	width: 50px;
-	height: 32px;
-	margin: 8px 5px;
-	font-size: 32px;
-	padding: 10px;
-	display: inline-block;
-	text-align: center;
-	border-radius: 10px;
-	text-shadow: white 0 0 10px;
-}
+            background-color: #101530;
+        }
 
-@media screen and (min-width:720px){
-#main
-{
-	max-width: 700px;
-}
-.item
-{
-	width: 100px;
-	height: 64px;
-	margin: 16px 10px;
-	font-size: 64px;
-	padding: 20px;
-	display: inline-block;
-	text-align: center;
-	border-radius: 20px;
-}
-}
-#other
-{
-	position:fixed;
-	bottom: 0px;
-    right: 20px;
-}
-button
-{
-	font-size: 32px;
-	padding: 32px;
-	margin-top: 32px;
-}
-#fail, #next
-{
-	position: fixed;
-	width: 100%;
-	height: 100%;
-	background: rgba(0,0,0,0.5);
-	text-align: center;
-	color: white;
-	font-weight: bold;
-	font-size: 30px;
-	padding-top: 100px;
-	z-index: 999;
-}
-.sortable-ghost
-{
-	opacity: 0 !important;
-}
-.pop
-{
-	transition: all 1s;
-    transform: scale(2);
-    opacity: 0 !important;
-}
-.drop
-{
-	transition: all 1s;
-    transform: scale(0);
-    opacity: 0 !important;
-}
-</style>
-<script>
+        #congratulations {
+            position: fixed;
+            height: 600px;
+            width: 400px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            visibility: hidden;
+        }
 
-var player = {
-	itemCounts: [8, 16, 12, 20],
-	bests: [10, 20, 15, 45],
-	difficulties: [0.9, 0.8, 1],
-	currentLevel: 0,
-	currentDifficulty :0
-};
+        .book {
+            padding-left: 12px;
+            font-size: 16px;
+            background-color: darkred;
+            color: white;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
 
-	level = {
-		count: player.itemCounts[player.currentLevel],
-		started: false,
-		complete: false,
-		startTime: null,
-		duration: Math.round(player.bests[player.currentLevel] * player.difficulties[player.currentDifficulty])
-	};
+        .author, .title
+        {
+            margin: 0 24px;
+        }
 
-// Fisher-Yates Shuffle
-function shuffle (array) {
-var i = 0
-  , j = 0
-  , temp = null
+        .selected {
+            box-shadow: 0px 0px 5px 5px rgb(255, 140, 0);
+            z-index: 100;
+        }
 
-for (i = array.length - 1; i > 0; i -= 1) {
-  j = Math.floor(Math.random() * (i + 1))
-  temp = array[i]
-  array[i] = array[j]
-  array[j] = temp
-}
-}
+        #hand .book {
+            box-shadow: 0px 0px 20px 15px rgba(0, 0, 0, 0.8)
+        }
 
-function replay()
-{
-	$('#fail').css("display", "none");
-	level = {
-		count: player.itemCounts[player.currentLevel],
-		started: false,
-		complete: false,
-		startTime: null,
-		duration: Math.round(player.bests[player.currentLevel] * player.difficulties[player.currentDifficulty])
-	};
+        .placeholder {
+            padding-left: 12px;
+            font-size: 20px;
+            background: #020520 !important;
+            color: rgba(0, 0, 0, 0);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
 
-	setupLevel();
-};
+        #shelf {
+            margin-left: 24px;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        #hand {
+            font-size: 50px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 100;
+            height: 100px;
+            width: 400px;
+            position: absolute;
+        }
+    </style>
+    <script>
+
+        var titles = [
+            "Selected Verse",
+            "Collected Works",
+            "Complete Poems",
+            "Anthology",
+            "Short Stories",
+            "A Time To Die",
+            "Painted Leopards",
+            "The Battle of Hope",
+            "In the Wake",
+            "Fly in the Ointment",
+            "Hardlight Firefight",
+            "The Midnight Hunt",
+            "No Time Like The Present",
+            "Dimension Chaos",
+            "Apogee Element",
+            "Dusts of Ganymede",
+            "Trevor in the Lake of Bones",
+            "The Shards of Nyquist",
+            "Old Hearts, Old Blood",
+            "The Needle in the Portrait",
+            "Fifteen Dusks",
+            "Tied at the Final Whistle",
+            "The Case of Ophelia Frown",
+            "Susan's Memory Tree",
+            "The Crown between the Pillars",
+            "A Pauper at the Feast",
+            "Lace Valley",
+            "Lie to the Letter",
+            "Nigel's Horse",
+            "Wild Symbols",
+            "My Sister's Lover",
+            "Doctor Zoster",
+            "Jealous Shaun",
+            "Eggenham Hall",
+            "The Journey of Mu",
+            "Cavendish's Venus",
+            "A History of Spindlecraft",
+            "The Goats of the Vallavian Mountains",
+            "Nuxology: an Introduction",
+            "First Steps in Untangling",
+            "The 1000 Greatest Vanilla Artists",
+            "The Life of Lee Delamere",
+            "Modern Shotput",
+            "Walking Trips in the Parish of Basting",
+            "Training Your Millipede",
+            "The Big Book of Triangles",
+            "Butterhill Village Through The Ages",
+            "Roman Settlements across Great Brittle",
+            "The Encyclopedia of Cheeses",
+            "A First Course in Needle Welding",
+            "Introducing Para-psychography",
+            "Neo-Neutronian Architecture 1945-1979",
+            "A Year in Artex",
+            "My Own Mother",
+            "Knowing Arthur",
+            "How to Draw Pelargic Birds",
+            "The Machine of Grief",
+            "Triangulating the Day",
+            "Aria for Aries",
+            "Sixes and Nines",
+            "Answer on a Postcard",
+            "The Unburning Flame",
+            "The Crow Flies",
+            "Death's Door",
+            "Or For Worse",
+            "Badge of Honour",
+            "The Six Year's War",
+            "New Approaches in Buffalo Migration Studies",
+            "More Powerful Presentations",
+            "Hat Skills for Young Learners",
+            "A New Course in Sedimentary Rocks",
+            "Both Ways Around The World",
+            "Good Hair Design",
+            "How To Understand Your New Microwave",
+            "Mains Powered Apparatus Safety",
+            "1001 Great Pasta Dishes",
+            "More Melodies for Intermediate Clarinet",
+            "Measuring Overhead Catenary Voltages",
+            "Man and God",
+            "The Riders of Gusset Valley",
+            "Ceramics: an Introduction",
+            "First Steps in Logistics",
+            "The Practicioners Guide to Paediatric Nursing",
+            "Woodworking: a field manual",
+            "The 1000 Greatest Films of All Time",
+            "A Year in Venice",
+            "The Life of Dr Fred Clammy",
+            "An Illustrated History of Basting",
+            "Modern Recording Techniques",
+            "Walking Trips in Portend",
+            "Training Your Ferret",
+            "Baking The Easy Way",
+            "Upholstry Made Simple",
+            "The Encyclopedia of Cheese",
+            "A First Cause in Homophony",
+            "Introducing Drench",
+            "Dead in the Water",
+            "Emergency Resuscitation for Dummies",
+            "Word Puzzles for Minoan Beginners",
+            "A Historian’s Guide to Pork Cathedral",
+            "A Topological Dictionary of Ancient Greek",
+            "Telehandler Operation and Maintenance",
+            "Modelling Spherical Tokamaks",
+            "Person-Centred Approaches to Dissociation",
+            "An Oral History of Haslet Branch Library",
+            "Modern Maritime Lubricant Formulations",
+            "Hydroforming Convex Galvanised Components",
+            "The Design and Implementation of Distributed Algorithms",
+            "Cartesian Holotropy Theory",
+            "New Developments in Plate Tectonics",
+            "The RT/23 Technical Manual"
+        ];
 
 
-function nextLevel()
-{
-	$('#next').css("display", "none");
+        var names = {
+            "manual": [
+                "Richard Charnock",
+                "Chaise Long",
+                "Lucy Morell",
+                "Lee Delamere",
+                "Dean Taunton"
+            ],
+            "given-names": {
+                "negative": [
+                    "shame",
+                    "gluttony",
+                    "dentine",
+                    "altimeter",
+                    "catheter",
+                    "raglan",
+                    "heave",
+                    "rennet",
+                    "retina",
+                    "withdrew",
+                    "bevel",
+                    "lanolin",
+                    "baryon",
+                    "knarl",
+                    "almond",
+                    "stave",
+                    "favela",
+                    "flan",
+                    "latrine",
+                    "hazard",
+                    "cloret",
+                    "tabbard",
+                    "witherward",
+                    "barren",
+                    "litany",
+                    "curfew",
+                    "prion",
+                    "haslet",
+                    "histamine",
+                    "tarry",
+                    "curette",
+                    "ceefax",
+                    "araldite",
+                    "emnity",
+                    "annelid",
+                    "cilia",
+                    "myelin",
+                    "fontanelle",
+                    "petri",
+                    "atonia",
+                    "avarice",
+                    "median",
+                    "felony",
+                    "rubella",
+                    "favela",
+                    "baleen",
+                    "stave",
+                    "felony",
+                    "stevia",
+                    "olestra",
+                    "yob",
+                    "retina",
+                    "raglan",
+                    "enamel",
+                    "chamois",
+                    "nicoise",
+                    "cloaca",
+                    "seethe",
+                    "hernia",
+                    "haslet",
+                    "gannet",
+                    "rant",
+                    "grief",
+                    "artifice",
+                    "malice",
+                    "callus",
+                    "gelatine",
+                    "violent",
+                    "celery",
+                    "tissue",
+                    "vanilla",
+                    "countenance",
+                    "sinus",
+                    "leotard",
+                    "trivia",
+                    "thermos",
+                    "chance",
+                    "fray",
+                    "margarine",
+                    "cellulose",
+                    "carton",
+                    "maudlin",
+                    "mohair",
+                    "grayish",
+                    "cassette",
+                    "florid",
+                    "malaise",
+                    "casserole",
+                    "wane",
+                    "prude",
+                    "ulna",
+                    "rhodesia",
+                    "credenza",
+                    "chaise",
+                    "hessian",
+                    "shant",
+                    "sinus",
+                    "grave",
+                    "bonjela",
+                    "absentia",
+                    "chlorine",
+                    "punnet",
+                    "wallow",
+                    "phial",
+                    "ebb",
+                    "folly",
+                    "harlot",
+                    "deter",
+                    "heathen",
+                    "fawn",
+                    "harried",
+                    "falter",
+                    "hack",
+                    "omen",
+                    "alas",
+                    "yoghurt",
+                    "threnody",
+                    "malady",
+                    "varicella",
+                    "regalia",
+                    "rotiserrie",
+                    "norad",
+                    "turnip",
+                    "pilfer",
+                    "teeter",
+                    "satchel",
+                    "cess",
+                    "codeine",
+                    "pleura",
+                    "brawn",
+                    "drain",
+                    "vendetta",
+                    "alive",
+                    "dirge",
+                    "viscera",
+                    "glycerine",
+                    "janky",
+                    "linseed",
+                    "xanthan",
+                    "lawn",
+                    "sack",
+                    "charcuterie",
+                    "pessary",
+                    "denial",
+                    "dive",
+                    "lozenge",
+                    "innard",
+                    "garotte",
+                    "jute",
+                    "tremor",
+                    "gorge",
+                    "hairy",
+                    "charnel",
+                    "tirade",
+                    "ambulance",
+                    "abandon",
+                    "lettuce",
+                    "fib",
+                    "colic"
+                ],
+                "positive": [
+                    "flora",
+                    "arabella",
+                    "henrietta",
+                    "beatrix",
+                    "annabelle",
+                    "hugo",
+                    "rupert",
+                    "alastair",
+                    "ambrose",
+                    "percy",
+                    "rollo",
+                    "spencer",
+                    "phillip",
+                    "henry",
+                    "george",
+                    "elizabeth",
+                    "charlotte",
+                    "margot",
+                    "arthur",
+                    "Margaret",
+                    "cecil",
+                    "winston",
+                    "tarquin",
+                    "beatrice",
+                    "josephine",
+                    "virginia",
+                    "dorcas",
+                    "ophelia"
+                ],
+                "standard": [
+                    "susan",
+                    "derek",
+                    "dudley",
+                    "bob",
+                    "barry",
+                    "Dave",
+                    "Dennis",
+                    "Trevor",
+                    "Sarah",
+                    "Robert",
+                    "john",
+                    "Peter",
+                    "Mary",
+                    "James",
+                    "Michael",
+                    "stuart",
+                    "shaun",
+                    "adam",
+                    "emma",
+                    "andrea",
+                    "brian",
+                    "natalie",
+                    "kirsty",
+                    "tracey",
+                    "rebecca",
+                    "oliver",
+                    "andrew",
+                    "gary",
+                    "gregory",
+                    "jacqueline",
+                    "emily",
+                    "harriet",
+                    "laura",
+                    "debbie",
+                    "SUSAN",
+                    "JULIE",
+                    "KAREN",
+                    "TRACEY",
+                    "JANE",
+                    "HELEN",
+                    "DIANE",
+                    "SHARON",
+                    "TRACY",
+                    "ANGELA",
+                    "SARAH",
+                    "ALISON",
+                    "CAROLINE",
+                    "AMANDA",
+                    "SANDRA",
+                    "LINDA",
+                    "CATHERINE",
+                    "ELIZABETH",
+                    "CAROL",
+                    "JOANNE",
+                    "WENDY",
+                    "JANET",
+                    "DAWN",
+                    "CHRISTINE",
+                    "NICOLA",
+                    "GILLIAN",
+                    "SALLY",
+                    "MARIA",
+                    "MICHELLE",
+                    "DEBRA",
+                    "PAULA",
+                    "ANNE",
+                    "LORRAINE",
+                    "PATRICIA",
+                    "MARY",
+                    "DENISE",
+                    "MARGARET",
+                    "ANN",
+                    "BEVERLEY",
+                    "DONNA",
+                    "ELAINE",
+                    "FIONA",
+                    "JENNIFER",
+                    "LESLEY",
+                    "LOUISE",
+                    "MANDY",
+                    "TINA",
+                    "JAYNE",
+                    "SUZANNE",
+                    "ANDREA",
+                    "PAULINE",
+                    "LISA",
+                    "CLAIRE",
+                    "KIM",
+                    "JULIA",
+                    "TERESA",
+                    "HEATHER",
+                    "KATHRYN",
+                    "LYNN",
+                    "RUTH",
+                    "YVONNE",
+                    "JUDITH",
+                    "MELANIE",
+                    "MARIE",
+                    "PAMELA",
+                    "CAROLE",
+                    "BARBARA",
+                    "GAIL",
+                    "LYNNE",
+                    "CLARE",
+                    "JANICE",
+                    "RACHEL",
+                    "JILL",
+                    "KATHERINE",
+                    "KATHLEEN",
+                    "SHIRLEY",
+                    "ANNETTE",
+                    "CAROLYN",
+                    "ANNA",
+                    "SARA",
+                    "VALERIE",
+                    "CHERYL",
+                    "JEANETTE",
+                    "KAY",
+                    "ANITA",
+                    "MAXINE",
+                    "FRANCES",
+                    "JOANNA",
+                    "THERESA",
+                    "DEBBIE",
+                    "LYNDA",
+                    "MAUREEN",
+                    "ROSEMARY",
+                    "MICHELE",
+                    "LAURA",
+                    "REBECCA",
+                    "SHEILA",
+                    "STEPHANIE",
+                    "DAVID",
+                    "PAUL",
+                    "ANDREW",
+                    "MARK",
+                    "JOHN",
+                    "MICHAEL",
+                    "STEPHEN",
+                    "IAN",
+                    "ROBERT",
+                    "RICHARD",
+                    "CHRIS",
+                    "PETER",
+                    "SIMON",
+                    "ANTHONY",
+                    "KEVIN",
+                    "STEVEN",
+                    "MARTIN",
+                    "JAMES",
+                    "PHILIP",
+                    "ALAN",
+                    "NEIL",
+                    "NIGEL",
+                    "TIMOTHY",
+                    "COLIN",
+                    "GRAHAM",
+                    "JONATHAN",
+                    "NICHOLAS",
+                    "WILLIAM",
+                    "ADRIAN",
+                    "BRIAN",
+                    "STUART",
+                    "KEITH",
+                    "THOMAS",
+                    "PATRICK",
+                    "SEAN",
+                    "CARL",
+                    "TREVOR",
+                    "WAYNE",
+                    "SHAUN",
+                    "KEN",
+                    "BARRY",
+                    "DEREK",
+                    "DEAN",
+                    "RAYMOND",
+                    "ANTONY",
+                    "JEREMY",
+                    "JOSEPH",
+                    "EDWARD",
+                    "LEE",
+                    "TERENCE",
+                    "MATTHEW",
+                    "DANIEL",
+                    "GEORGE",
+                    "RUSSELL",
+                    "CHARLES",
+                    "JEFFREY",
+                    "CLIVE",
+                    "PHILLIP",
+                    "CRAIG",
+                    "ROGER",
+                    "JULIAN",
+                    "GEOFFREY",
+                    "KARL",
+                    "MALCOLM",
+                    "DARREN",
+                    "TONY",
+                    "ADAM",
+                    "ROBIN",
+                    "ROY",
+                    "VINCENT",
+                    "MOHAMMED",
+                    "GORDON",
+                    "DUNCAN",
+                    "LESLIE",
+                    "ALEXANDER",
+                    "GREGORY",
+                    "GARETH",
+                    "RONALD",
+                    "DOUGLAS",
+                    "FRANCIS",
+                    "STEWART",
+                    "GRAEME",
+                    "GUY",
+                    "TERRY",
+                    "ALLAN",
+                    "HOWARD",
+                    "JASON",
+                    "IAIN",
+                    "GLENN",
+                    "DENNIS",
+                    "GAVIN",
+                    "DOMINIC"
+                ]
+            },
+            "family-names": {
+                "other": [
+                    "shindogu",
+                    "barbacoa",
+                    "clarinet"
+                ],
+                "negative": [
+                    "cromwell",
+                    "fawkes",
+                    "chamberlain",
+                    "coward",
+                    "dispencer",
+                    "zoster",
+                    "hencewith",
+                    "forthwith",
+                    "burden",
+                    "gore",
+                    "bitumen",
+                    "blackwater",
+                    "dander",
+                    "crouch",
+                    "honeybucket",
+                    "hohlraum",
+                    "mayhem",
+                    "flinch",
+                    "husk",
+                    "gland",
+                    "gall",
+                    "spent",
+                    "buckfast",
+                    "moult",
+                    "frill",
+                    "flake",
+                    "clampdown",
+                    "wiles",
+                    "beeching",
+                    "madden",
+                    "foyer",
+                    "ides",
+                    "moribund",
+                    "bland",
+                    "seabottom",
+                    "heap",
+                    "clout",
+                    "salad",
+                    "gall",
+                    "shill",
+                    "agar",
+                    "tarnish",
+                    "whine",
+                    "gross",
+                    "frown",
+                    "peevish",
+                    "harridan",
+                    "headwinds",
+                    "bollard",
+                    "dredge",
+                    "scurry",
+                    "languish",
+                    "currant",
+                    "torrent",
+                    "bellow",
+                    "arson",
+                    "seams",
+                    "flaw",
+                    "crater",
+                    "wellhard",
+                    "dross",
+                    "tallow",
+                    "grating",
+                    "lavatory",
+                    "swab",
+                    "melt",
+                    "heritage",
+                    "gritty",
+                    "funnel",
+                    "gulley",
+                    "scalding",
+                    "plummet",
+                    "knotweed",
+                    "frantic",
+                    "null",
+                    "nought",
+                    "abrupt",
+                    "askew",
+                    "wrest",
+                    "gaunt",
+                    "pylon",
+                    "portend",
+                    "foist",
+                    "scant",
+                    "abscond",
+                    "bridle",
+                    "hinder",
+                    "chilblain",
+                    "lambast",
+                    "pillory",
+                    "laminator",
+                    "tantrum"
+                ],
+                "positive": [
+                    "windsor",
+                    "beaumont",
+                    "devereaux",
+                    "penrose",
+                    "willoughby"
+                ],
+                "themepark": [
+                    "alton",
+                    "flambard",
+                    "billing",
+                    "botton",
+                    "brean",
+                    "crealy",
+                    "dingle",
+                    "drayton",
+                    "drummond",
+                    "hollycombe",
+                    "lightwater",
+                    "marwell",
+                    "oakwood",
+                    "thorpe",
+                    "twinlake",
+                    "watermouth",
+                    "loudoun"
+                ],
+                "motorway-services": [
+                    "pagnell",
+                    "chievely",
+                    "mimms",
+                    "sandbach",
+                    "tebay",
+                    "knutsford",
+                    "rownham",
+                    "hopwood"
+                ],
+                "frequent": [
+                    "Adams",
+                    "Anderson",
+                    "Barker",
+                    "Brown",
+                    "Campbell",
+                    "Clark",
+                    "Clarke",
+                    "Coleman",
+                    "Davies",
+                    "Dixon",
+                    "Doherty",
+                    "Edwards",
+                    "Evans",
+                    "Graham",
+                    "Green",
+                    "Griffiths",
+                    "Hall",
+                    "Hamilton",
+                    "Hill",
+                    "Hughes",
+                    "Hunter",
+                    "Jackson",
+                    "Johnson",
+                    "Johnston",
+                    "Jones",
+                    "Kelly",
+                    "Lewis",
+                    "MacDonald",
+                    "Martin",
+                    "McLaughlin",
+                    "Mitchell",
+                    "Moore",
+                    "Morgan",
+                    "Morris",
+                    "Morrison",
+                    "Murphy",
+                    "Murray",
+                    "Newman",
+                    "O'Neill",
+                    "Owen",
+                    "Palmer",
+                    "Paterson",
+                    "Pearce",
+                    "Phillips",
+                    "Price",
+                    "Rees",
+                    "Reid",
+                    "Richards",
+                    "Roberts",
+                    "Robertson",
+                    "Robinson",
+                    "Ross",
+                    "Russell",
+                    "Scott",
+                    "Shaw",
+                    "Smith",
+                    "Stewart",
+                    "Taylor",
+                    "Thomas",
+                    "Thompson",
+                    "Turner",
+                    "Walker",
+                    "Ward",
+                    "Watson",
+                    "Webb",
+                    "White",
+                    "Wilkinson",
+                    "Williams",
+                    "Wilson",
+                    "Wood",
+                    "Wright",
+                    "Young"
+                ]
+            }
+        };
 
-	// go on to next level
+        // Fisher-Yates Shuffle
+        function shuffle(array) {
+            var i = 0
+                , j = 0
+                , temp = null
 
-	player.currentLevel = (player.currentLevel + 1) % player.itemCounts.length;
-	player.currentDifficulty = (player.currentDifficulty + 1) % player.difficulties.length;
+            for (i = array.length - 1; i > 0; i -= 1) {
+                j = Math.floor(Math.random() * (i + 1))
+                temp = array[i]
+                array[i] = array[j]
+                array[j] = temp
+            }
+        }
 
-	level = {
-		count: player.itemCounts[player.currentLevel],
-		started: false,
-		complete: false,
-		startTime: null,
-		duration: Math.round(player.bests[player.currentLevel] * player.difficulties[player.currentDifficulty])
-	};
+        function pick(list, i) {
+            return list[i % list.length];
+        }
 
-	setupLevel();
-}
+        function titleCase(str) {
+            str = str.toLowerCase().split(' ');
+            for (var i = 0; i < str.length; i++) {
+                str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+            }
+            return str.join(' ');
+        }
 
-	function setupGame()
-	{
-		var list = document.getElementById("main");
-		var sortoptions = {
-			delay: 0,
-			onStart: startLevel,
-			onUpdate: checkLevel,
-			animate: 50
-		};
-		Sortable.create(list, sortoptions);
-		setInterval(function(){ 
-			updateDisplay();
-		}, 10);
-	}
+        function getDomIndex(target) {
+            return [].slice.call(target.parentNode.children).indexOf(target)
+        }
 
+        var viewheight = window.innerHeight;
+        var level;
+        var shelf;
+        var hand;
+        var handEl;
+        var selectedIndex = 0;
+        var handIndex = 0;
+        var camerapos = 0.0;
+        var handheight = 0;
+        var cameraVelocity = 0.0;
+        var frictionRatio = 0.4;
 
-	function setupLevel()
-	{
-		var order = [];
-		for (var i = 0; i < level.count; i++)
-		{
-			order.push(i);
-		}
+        var reserve = [];
+        var books = [];
 
-		shuffle(order);
+        function drawBook(book) {
+            var authorEl = document.createElement("div");
+            authorEl.classList.add("author");
+            authorEl.appendChild(document.createTextNode(book.author));
+            var titleEl = document.createElement("div");
+            titleEl.classList.add("title");
+            titleEl.appendChild(document.createTextNode(book.title));
+            var bookEl = document.createElement("div");
+            bookEl.classList.add("book");
+            bookEl.style.width = "" + book.width + "px";
+            bookEl.style.height = "" + book.height + "px";
 
-		$('#main').html("");
-		for (var i = 0; i < level.count; i++)
-		{
-			var item = $("<li class='item'></li>");
-			var number = order[i];
-			var hue = ((0.0 + number)/level.count) * 210;
-			item.css("background-color", chroma.hcl(hue, 100, 100));
-			item.css("opacity", 0);
-			item.attr("id", "i" + number);
-			item.html("" + (number + 1));
-			$('#main').append(item);
-			item.animate({
-				"opacity": "1"
-				}, 100 * i);
-		}
-		$('#time').css("opacity", 1);
-	}
+            switch(book.layout)
+            {
+                case 0: bookEl.style.justifyContent = "space-between"; break;
+                case 1: bookEl.style.justifyContent = "flex-start"; break;
+                case 2: bookEl.style.justifyContent = "flex-end"; break;
+                case 3: bookEl.style.justifyContent = "center"; break;
+            }
 
-	function time()
-	{
-		return Date.now();
-	}
+            console.log(book.hue);
 
-	function updateDisplay()
-	{
-		if (level.started && !level.complete)
-		{
-			var remaining = level.duration - ((time() - level.startTime)/1000);
-			if (remaining > 0)
-			{
-			}
-			else
-			{
-				$('#time').css("width", "100%");
-				$('#time').stop(true, false);
-				$('#time').animate({
-					"opacity": "0"
-				}, 500);
-				$('#main li').addClass("drop");
-				$('#fail').css("display", "block");
-				level.failed = true;
-			}
-		}
-		else
-		{
-			if (!level.started)
-			{
-				$('#time').css("width", 0);
-			}
-		}
-	}
+            bookEl.style.background = "linear-gradient(180deg, " +
+                chroma.oklch(0.6, 0.15, book.hue).css() + " 0%, " +
+                chroma.oklch(0.5, 0.15, book.hue).css() + " 19%, " +
+                chroma.oklch(0.4, 0.15, book.hue).css() + " 82%, " +
+                chroma.oklch(0.2, 0.15, book.hue).css() + " 100%)";
 
-	function startLevel()
-	{
-		// if the game isn't started, start the timer
-		if (!level.started)
-		{
-			level.started = true;
-			level.startTime = time();
-		}
-		$('#time').css("opacity", 1);
-		$('#time').animate({
-			width: "100%"
-		}, level.duration * 1000, "linear");
-	}
+            if (book.order == 0)
+            {
+                bookEl.appendChild(authorEl);
+                bookEl.appendChild(titleEl);
+            }
+            else
+            {
+                bookEl.appendChild(titleEl);
+                bookEl.appendChild(authorEl);
+            }
+            return bookEl;
+        }
 
-	function checkLevel()
-	{
-		if (level.failed)
-		{
-			return;
-		}
+        function createBooks() {
+            for (var i = 0; i < 200; i++) {
+                var given = (i % 2 == 0) ? pick(names["given-names"].negative, i / 2) : pick(names["given-names"].standard, Math.floor(i / 2));
+                var family = (i % 2 == 0) ? pick(names["family-names"].frequent, i / 2) : pick(names["family-names"].negative, Math.floor(i / 2));
 
-		// ensure the level has started properly
-		startLevel();		
+                var thisBook = {
+                    "author": given + " " + family,
+                    title: pick(titles, i),
+                    "hue": Math.random() * 360,
+                    "order": Math.floor(Math.random() * 2),
+                    "layout": Math.floor(Math.random() * 4),
+                    width: (300 + (Math.random() * 100)),
+                    height: (30 + (Math.random() * 30))
+                };
+                reserve.push(
+                    thisBook
+                );
+            }
+        }
 
-		// check whether the list is ordered
-		var items = $('#main').children();
-		var highest = -1;
+        function drawBooks() {
+            handEl.innerHTML = "";
+            shelf.innerHTML = "";
 
-		level.complete = true;
-		items.each(function ()
-		{
-			var number = parseInt($(this).attr("id").substr(1));
-			if (number > highest)
-			{
-				highest = number;
-			}
-			else
-			{
-				level.complete = false;
-			}
-		})
-		// level is complete
-		if (level.complete)
-		{
-			$('#main li').addClass("pop");
-			$('#time').stop(true, false);
-			$('#time').animate({
-				"opacity": "0"
-			}, 500);
-			$('#next').css("opacity", "0");
-			$('#next').css("display", "block");
-			$('#next').css("top", "-100%");
-			$('#next').animate({
-				"opacity": "1",
-				"top": "0"
-			}, 1000);
-			level.finishTime = time();
-			var newtime = player.bests[player.currentLevel]/2 + ((0.0 + level.finishTime - level.startTime) / 1000)/2;
-			player.bests[player.currentLevel] = newtime;
+            for (var thisBook of books) {
+                var bookEl = drawBook(thisBook);
+                shelf.appendChild(bookEl);
+            }
+        }
 
-			$('#itemcount').html(level.count);
-			$('#completiontime').html(((level.finishTime - level.startTime)/1000).toFixed(1));
-		}
-		
-	}
+        function draw() {
+            var centre = viewheight / 2;
 
-$(function ()
-{
-	setupGame();
-	setupLevel();
-}
-);
-</script>
+            var bookCentre = books.slice(0, selectedIndex).reduce((prev, book) => prev + book.height, 0);
+
+            if (hand) {
+                // Center the gap where the book would get inserted
+                if (selectedIndex == handIndex) {
+                    // The book appears in the centre of the placeholder gap
+                    bookCentre = bookCentre + (books[selectedIndex].height / 2);
+                }
+                else if (selectedIndex > handIndex) {
+                    // Insert the book *after* the selected book
+                    bookCentre = bookCentre + books[selectedIndex].height;
+                }
+                else {
+                    // Insert the book *before* the selected book
+                    // We need do nothing
+                }
+            }
+            else {
+                // Centre the selected book
+                bookCentre = bookCentre + (books[selectedIndex].height / 2);
+            }
+
+            // try and seek towards the right position
+            var target = centre - bookCentre;
+
+            cameraVelocity = ((target - camerapos) * 0.4);
+
+            camerapos = camerapos + cameraVelocity;
+            level.style.transform = "translate(0, " + camerapos + "px)";
+
+            if (hand) { handheight = handheight + ((200 - handheight) * 0.3); } else { handheight = 0; }
+            var handScale = 1 + ((handheight / 150) * 0.2);
+            handEl.style.transform = "translate(" + handheight + "px, " + (centre - 50) + "px) scale(" + handScale + ")";
+        }
+
+        function highlightSelected() {
+            var selected = document.querySelector(".selected");
+            if (selected) { selected.classList.remove("selected"); }
+
+            if (!hand) {
+                var bookEls = document.querySelectorAll("#shelf .book");
+                bookEls[selectedIndex].classList.add("selected");
+            }
+        }
+
+        function start() {
+            shuffle(names["given-names"].negative);
+            names["given-names"].negative = names["given-names"].negative.map((el) => titleCase(el));
+            shuffle(names["given-names"].standard);
+            names["given-names"].standard = names["given-names"].standard.map((el) => titleCase(el));
+            shuffle(names["family-names"].negative);
+            names["family-names"].negative = names["family-names"].negative.map((el) => titleCase(el));
+            shuffle(names["family-names"].frequent);
+            names["family-names"].frequent = names["family-names"].frequent.map((el) => titleCase(el));
+
+            level = document.getElementById("level");
+            shelf = document.getElementById("shelf");
+            handEl = document.querySelector("#hand");
+            viewheight = window.innerHeight;
+
+            selectedIndex = 0;
+
+            createBooks();
+            books = reserve.splice(0, 10);
+            drawBooks();
+            draw();
+            highlightSelected();
+
+            window.addEventListener('keydown', function (e) {
+                switch (e.keyCode) {
+                    case 40:
+                        if (selectedIndex < books.length - 1) {
+                            selectedIndex++;
+                            highlightSelected();
+                        }
+                        break;
+                    case 38:
+                        if (selectedIndex > 0) {
+                            selectedIndex--;
+                            highlightSelected();
+                        }
+                        break;
+                    case 37:
+                    case 39:
+                    case 13:
+                        console.log("fnord");
+                        if (hand) {
+                            // put the book down
+                            books.splice(handIndex, 1);
+                            books.splice(selectedIndex, 0, hand);
+                            hand = null;
+
+                            drawBooks();
+                            draw();
+                            highlightSelected();
+
+                            // Check if it is sorted!
+                            var sorted = true;
+                            for (var i = 0; i < books.length - 2; i++) {
+                                if (books[i].author.split(" ")[1] > books[i + 1].author.split(" ")[1]) {
+                                    sorted = false;
+                                }
+                            }
+                            if (sorted) {
+                                console.log("sorted");
+
+                                var congratsEl = document.getElementById("congratulations");
+                                congratsEl.style.visibility = "visible";
+                                setTimeout(() => {
+                                    document.getElementById("congratulations").style.visibility = "hidden";
+                                    var newbooks = reserve.splice(0, 10);
+                                    newbooks.forEach((book) => { books.push(book); });
+                                    drawBooks();
+                                    draw();
+                                    highlightSelected();
+                                }, 5000);
+                            }
+                        }
+                        else {
+                            hand = books[selectedIndex];
+                            handIndex = selectedIndex;
+                            var bookEls = document.querySelectorAll("#shelf .book");
+                            bookEls[selectedIndex].classList.add("placeholder");
+
+                            handEl.appendChild(drawBook(hand));
+                            highlightSelected();
+                        }
+                        break;
+                    default:
+                        console.log(e.keyCode);
+                        break;
+                }
+            });
+
+            window.setInterval(() => { draw(); }, 20);
+        }
+    </script>
 </head>
-<body>
-<div id="time">
-</div>
-<div id="next" style="display: none">
-Well done!
-<br>
-You sorted <span id="itemcount"></span> numbers in <span id="completiontime"></span> seconds. 
-<br>
-<button onclick="nextLevel();">Next level</button>
-</div>
-<div id="fail" style="display: none">
-Too slow!
-<br>
-<button onclick="replay();">Try again</button>
-</div>
-<ul id="main">
 
-</ul>
-<div id="other">
-<div id="stats">
-<span id="complete">
-</span>
-</div>
-<ul id="working">
-</ul>
-</div>
+<body onload="start()">
+    <div id="congratulations">
+        <p>good job!</p>
+        <p>your prize is:</p>
+        <p>more books</p>
+    </div>
+    <div id="hand">
+
+    </div>
+    <div id="level">
+        <div id="shelf">
+
+        </div>
+    </div>
 </body>
+
 </html>
