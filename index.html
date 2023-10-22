@@ -3,15 +3,21 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
+    <meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, user-scalable=no">
     <title>Consortia</title>
     <script src="chroma.min.js"></script>
     <style>
+        html {
+            touch-action: none;
+        }
+
         body {
             font-family: Helvetica, Arial, sans;
             display: flex;
             flex-direction: row;
+            font-size: 24px;
             margin: 0;
+            padding: 0;
             overflow: hidden;
             position: fixed;
 
@@ -22,9 +28,7 @@
             -ms-user-select: none;
             user-select: none;
 
-            touch-action: none;
-
-            background-color: #101530;
+            background-color: #868998;
         }
 
         #alert {
@@ -69,8 +73,8 @@
         .placeholder {
             padding-left: 12px;
             font-size: 20px;
-            background: #020520 !important;
-            color: rgba(0, 0, 0, 0);
+            background: rgba(0, 0, 20, 0.4) !important;
+            color: rgba(0, 0, 0, 0) !important;
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -82,7 +86,8 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            justify-content: flex-end;
+            justify-content: flex-start;
+            border-right: 20px solid aliceblue;
         }
 
         #hand {
@@ -992,13 +997,11 @@
         }
 
         var jumble = [];
-        for (var i = 0; i < 11; i++)
-        {
+        for (var i = 0; i < 11; i++) {
             var jumbler = [0, 1, 2, 3, 4, 5, 6];
             shuffle(jumbler);
-            for (var j = 0; j < 7; j++)
-            {
-                jumble.push((i*7) + jumbler[j]);
+            for (var j = 0; j < 7; j++) {
+                jumble.push((i * 7) + jumbler[j]);
             }
         }
 
@@ -1037,7 +1040,7 @@
         var books = [];
         var hues = [120, 143, 166, 206, 270, 300, 324, 348, 30, 90];
         var widths = [300, 314, 322, 330, 339, 351, 362, 373, 381, 389, 400];
-        var heights = [40, 46, 52, 61, 69, 74, 81];
+        var heights = [46, 52, 56, 61, 69, 74, 81];
 
         function drawBook(book) {
             var authorEl = document.createElement("div");
@@ -1060,11 +1063,14 @@
 
             console.log(book.hue);
 
+            var brightness = book.brightness;
+            bookEl.style.color = brightness ? "white" : "black";
+            if (brightness) { titleEl.style.fontVariantCaps = "small-caps"; } else { titleEl.style.fontWeight = 700; }
             bookEl.style.background = "linear-gradient(180deg, " +
-                chroma.oklch(0.6, 0.15, book.hue).css() + " 0%, " +
-                chroma.oklch(0.5, 0.15, book.hue).css() + " 19%, " +
-                chroma.oklch(0.4, 0.15, book.hue).css() + " 82%, " +
-                chroma.oklch(0.2, 0.15, book.hue).css() + " 100%)";
+                chroma.oklch(brightness ? 0.6 : 0.95, 0.15, book.hue).css() + " 0%, " +
+                chroma.oklch(brightness ? 0.5 : 0.85, 0.15, book.hue).css() + " 15%, " +
+                chroma.oklch(brightness ? 0.4 : 0.75, 0.15, book.hue).css() + " 85%, " +
+                chroma.oklch(brightness ? 0.2 : 0.5, 0.15, book.hue).css() + " 100%)";
 
             if (book.order == 0) {
                 bookEl.appendChild(authorEl);
@@ -1086,6 +1092,7 @@
                     "author": given + " " + family,
                     title: pick(titles, i),
                     "hue": pick(hues, i),
+                    "brightness": Math.floor(Math.random() * 2),
                     "order": Math.floor(Math.random() * 2),
                     "layout": Math.floor(Math.random() * 4),
                     width: pick(widths, i),
@@ -1109,20 +1116,18 @@
 
         var buttonTimeout = 100;
         var buttonLastPressed = {};
-        
+
 
         function draw() {
 
             if (gp) {
                 //console.log(gp.buttons)
-                for (var button in navigator.getGamepads()[0].buttons)
-                {
-                    if (button.pressed)
-                    {
+                for (var button in navigator.getGamepads()[0].buttons) {
+                    if (button.pressed) {
                         console.log("BUTTON");
                     }
                 }
-                
+
                 // check the buttons to see if we're meant to be doing anything
                 if (navigator.getGamepads()[0].buttons[12].pressed && (!buttonLastPressed[12] || buttonLastPressed[12] < (performance.now() - buttonTimeout))) {
                     buttonLastPressed[12] = performance.now();
@@ -1276,7 +1281,7 @@
             selectedIndex = 0;
 
             createBooks();
-            books = reserve.splice(0, 25);
+            books = reserve.splice(0, 22);
             drawBooks();
             draw();
             highlightSelected();
@@ -1300,43 +1305,84 @@
                 }
             });
 
-            window.addEventListener('click', function (e) {
-                var location = e.clientY;
-                if (location < viewCentre - 50)
-                {
-                    down();
-                }
-                else if (location > viewCentre + 50)
-                {
-                    up();
-                }
-                else
-                {
-                    grab();
+            window.addEventListener('mousemove', function (e) {
+                if (hand) {
+                    // if user starts dragging, how do we handle that?
                 }
             });
 
-            window.addEventListener('touchstart', function (e) {
-                console.log(e);
-                if (e.changedTouches.length > 0)
-                {
-                    var location = e.changedTouches[0].clientY;
-                    if (location < viewCentre - 50)
-                    {
-                        down();
+            window.addEventListener('mousedown', function (e) {
+                var location = e.clientY;
+
+                if ((e.target.parentElement && e.target.parentElement.id == "hand") || (e.target.parentElement && e.target.parentElement.parentElement && e.target.parentElement.parentElement.id == "hand")) {
+                    console.log("clicked on book in hand");
+                    grab();
+                } else if (e.target.classList.contains("book") || (e.target.parentElement && e.target.parentElement.classList.contains("book"))) {
+
+                    var index = 0;
+                    if (e.target.classList.contains("book")) {
+                        console.log(e.target);
+                        console.log(getDomIndex(e.target));
+                        index = getDomIndex(e.target);
                     }
-                    else if (location > viewCentre + 50)
-                    {
-                        up();
+                    else if (e.target.parentElement.classList.contains("book")) {
+                        console.log(e.target.parentElement);
+                        console.log(getDomIndex(e.target.parentElement));
+                        index = getDomIndex(e.target.parentElement);
                     }
-                    else
-                    {
+                    if (selectedIndex != index) {
+                        console.log("moving to " + index);
+                        selectedIndex = index;
+                        if (!hand) {
+                            grab();
+                        }
+                        else {
+                            draw();
+                            highlightSelected();
+                        }
+                    }
+                    else {
+                        console.log("clicked selected item");
                         grab();
                     }
-                    e.preventDefault();
-                    e.stopPropagation();
                 }
-            })
+                else {
+                    if (location < viewCentre - 50) {
+                        down();
+                    }
+                    else if (location > viewCentre + 50) {
+                        up();
+                    }
+                    else {
+                        grab();
+                    }
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            // window.addEventListener('touchstart', function (e) {
+            //     console.log(e);
+            //     if (e.changedTouches.length > 0)
+            //     {
+            //         var location = e.changedTouches[0].clientY;
+            //         if (location < viewCentre - 50)
+            //         {
+            //             down();
+            //         }
+            //         else if (location > viewCentre + 50)
+            //         {
+            //             up();
+            //         }
+            //         else
+            //         {
+            //             grab();
+            //         }
+            //         e.preventDefault();
+            //         e.stopPropagation();
+            //     }
+            // })
 
             window.setInterval(() => { draw(); }, 20);
         }
