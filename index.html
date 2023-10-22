@@ -1299,11 +1299,12 @@
             });
 
             window.addEventListener('click', function (e) {
-                if (e.clientY < viewCentre - 50)
+                var location = e.clientY;
+                if (location < viewCentre - 50)
                 {
                     down();
                 }
-                else if (e.clientY > viewCentre + 50)
+                else if (location > viewCentre + 50)
                 {
                     up();
                 }
@@ -1312,6 +1313,27 @@
                     grab();
                 }
             });
+
+            window.addEventListener('touchstart', function (e) {
+                console.log(e);
+                if (e.changedTouches.length > 0)
+                {
+                    var location = e.changedTouches[0].clientY;
+                    if (location < viewCentre - 50)
+                    {
+                        down();
+                    }
+                    else if (location > viewCentre + 50)
+                    {
+                        up();
+                    }
+                    else
+                    {
+                        grab();
+                    }
+                    e.preventDefault();
+                }
+            })
 
             window.setInterval(() => { draw(); }, 20);
         }
