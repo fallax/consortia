@@ -51,8 +51,8 @@
             align-items: center;
         }
 
-        .author, .title
-        {
+        .author,
+        .title {
             margin: 0 24px;
         }
 
@@ -1033,8 +1033,7 @@
             bookEl.style.width = "" + book.width + "px";
             bookEl.style.height = "" + book.height + "px";
 
-            switch(book.layout)
-            {
+            switch (book.layout) {
                 case 0: bookEl.style.justifyContent = "space-between"; break;
                 case 1: bookEl.style.justifyContent = "flex-start"; break;
                 case 2: bookEl.style.justifyContent = "flex-end"; break;
@@ -1049,13 +1048,11 @@
                 chroma.oklch(0.4, 0.15, book.hue).css() + " 82%, " +
                 chroma.oklch(0.2, 0.15, book.hue).css() + " 100%)";
 
-            if (book.order == 0)
-            {
+            if (book.order == 0) {
                 bookEl.appendChild(authorEl);
                 bookEl.appendChild(titleEl);
             }
-            else
-            {
+            else {
                 bookEl.appendChild(titleEl);
                 bookEl.appendChild(authorEl);
             }
@@ -1092,7 +1089,36 @@
             }
         }
 
+        var buttonTimeout = 100;
+        var buttonLastPressed = {};
+
         function draw() {
+
+            if (gp) {
+                //console.log(gp.buttons)
+                for (var button in navigator.getGamepads()[0].buttons)
+                {
+                    if (button.pressed)
+                    {
+                        console.log("BUTTON");
+                    }
+                }
+                
+                // check the buttons to see if we're meant to be doing anything
+                if (navigator.getGamepads()[0].buttons[12].pressed && (!buttonLastPressed[12] || buttonLastPressed[12] < (performance.now() - buttonTimeout))) {
+                    buttonLastPressed[12] = performance.now();
+                    down();
+                }
+                if (navigator.getGamepads()[0].buttons[13].pressed && (!buttonLastPressed[13] || buttonLastPressed[13] < (performance.now() - buttonTimeout))) {
+                    buttonLastPressed[13] = performance.now();
+                    up();
+                }
+                if (navigator.getGamepads()[0].buttons[0].pressed && (!buttonLastPressed[0] || buttonLastPressed[0] < (performance.now() - buttonTimeout))) {
+                    buttonLastPressed[0] = performance.now();
+                    grab();
+                }
+            }
+
             var centre = viewheight / 2;
 
             var bookCentre = books.slice(0, selectedIndex).reduce((prev, book) => prev + book.height, 0);
@@ -1140,7 +1166,74 @@
             }
         }
 
+        var gp = null;
+
+        function up() {
+            if (selectedIndex < books.length - 1) {
+                selectedIndex++;
+                highlightSelected();
+            }
+        }
+
+        function down() {
+            if (selectedIndex > 0) {
+                selectedIndex--;
+                highlightSelected();
+            }
+        }
+
+        function grab() {
+            console.log("fnord");
+            if (hand) {
+                // put the book down
+                books.splice(handIndex, 1);
+                books.splice(selectedIndex, 0, hand);
+                hand = null;
+
+                drawBooks();
+                draw();
+                highlightSelected();
+
+                // Check if it is sorted!
+                for (var achievement of achievements) {
+                    if (achievement.check()) {
+                        console.log("sorted!");
+                        console.log("Got " + achievement.title);
+
+                        var congratsEl = document.getElementById("alert");
+                        congratsEl.style.visibility = "visible";
+                        congratsEl.innerText = achievement.title + ": " + achievement.reward;
+                        achievement.finished();
+                        drawBooks();
+                        draw();
+                        highlightSelected();
+                        setTimeout(() => {
+                            document.getElementById("alert").style.visibility = "hidden";
+                        }, 5000);
+                    }
+                }
+            }
+            else {
+                hand = books[selectedIndex];
+                handIndex = selectedIndex;
+                var bookEls = document.querySelectorAll("#shelf .book");
+                bookEls[selectedIndex].classList.add("placeholder");
+
+                handEl.appendChild(drawBook(hand));
+                highlightSelected();
+            }
+        }
+
         function start() {
+
+            // set up controller support
+            window.addEventListener("gamepadconnected", function (e) {
+                gp = navigator.getGamepads()[e.gamepad.index];
+                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                    gp.index, gp.id,
+                    gp.buttons.length, gp.axes.length);
+            });
+
             shuffle(names["given-names"].negative);
             names["given-names"].negative = names["given-names"].negative.map((el) => titleCase(el));
             shuffle(names["given-names"].standard);
@@ -1166,61 +1259,15 @@
             window.addEventListener('keydown', function (e) {
                 switch (e.keyCode) {
                     case 40:
-                        if (selectedIndex < books.length - 1) {
-                            selectedIndex++;
-                            highlightSelected();
-                        }
+                        up();
                         break;
                     case 38:
-                        if (selectedIndex > 0) {
-                            selectedIndex--;
-                            highlightSelected();
-                        }
+                        down();
                         break;
                     case 37:
                     case 39:
                     case 13:
-                        console.log("fnord");
-                        if (hand) {
-                            // put the book down
-                            books.splice(handIndex, 1);
-                            books.splice(selectedIndex, 0, hand);
-                            hand = null;
-
-                            drawBooks();
-                            draw();
-                            highlightSelected();
-
-                            // Check if it is sorted!
-                            for (var achievement of achievements)
-                            {
-                                if (achievement.check())
-                                {
-                                    console.log("sorted!");
-                                    console.log("Got "+ achievement.title);
-
-                                    var congratsEl = document.getElementById("alert");
-                                    congratsEl.style.visibility = "visible";
-                                    congratsEl.innerText = achievement.title + ": " + achievement.reward;
-                                    achievement.finished();
-                                        drawBooks();
-                                        draw();
-                                        highlightSelected();
-                                    setTimeout(() => {
-                                        document.getElementById("alert").style.visibility = "hidden";
-                                    }, 5000);
-                                }
-                            }
-                        }
-                        else {
-                            hand = books[selectedIndex];
-                            handIndex = selectedIndex;
-                            var bookEls = document.querySelectorAll("#shelf .book");
-                            bookEls[selectedIndex].classList.add("placeholder");
-
-                            handEl.appendChild(drawBook(hand));
-                            highlightSelected();
-                        }
+                        grab();
                         break;
                     default:
                         console.log(e.keyCode);
