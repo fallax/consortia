@@ -253,7 +253,7 @@
             "No Time Like The Present",
             "Dimension Chaos",
             "Apogee Element",
-            "Dusts of Ganymede",
+            "The Dusts of Ganymede",
             "Trevor in the Lake of Bones",
             "The Shards of Nyquist",
             "Old Hearts, Old Blood",
@@ -520,7 +520,9 @@
                     "abandon",
                     "lettuce",
                     "fib",
-                    "colic"
+                    "colic",
+                    "stymie",
+                    "camembert"
                 ],
                 "positive": [
                     "flora",
@@ -877,7 +879,8 @@
                     "lambast",
                     "pillory",
                     "laminator",
-                    "tantrum"
+                    "tantrum",
+                    "oblong"
                 ],
                 "positive": [
                     "windsor",
@@ -1074,43 +1077,81 @@
             console.log(book.hue);
 
             var brightness = book.brightness;
-            bookEl.style.color = brightness ? "white" : "black";
-            if (brightness) { titleEl.style.fontVariantCaps = "small-caps"; } else { titleEl.style.fontWeight = 700; }
+            bookEl.style.color = brightness ? chroma.oklch(0.9, 0.01, book.hue).css() : chroma.oklch(0.05, 0.01, book.hue).css();
+            if (brightness) { titleEl.style.fontVariantCaps = "small-caps"; } else { titleEl.style.fontWeight = 600; }
             bookEl.style.background = "linear-gradient(180deg, " +
-                chroma.oklch(brightness ? 0.6 : 0.95, 0.15, book.hue).css() + " 0%, " +
+                chroma.oklch(brightness ? 0.3 : 0.7, 0.10, book.hue).css() + " 0%, " +
+                chroma.oklch(brightness ? 0.6 : 0.95, 0.15, book.hue).css() + " 5%, " +
                 chroma.oklch(brightness ? 0.5 : 0.85, 0.15, book.hue).css() + " 15%, " +
-                chroma.oklch(brightness ? 0.4 : 0.75, 0.15, book.hue).css() + " 85%, " +
-                chroma.oklch(brightness ? 0.2 : 0.5, 0.15, book.hue).css() + " 100%)";
+                chroma.oklch(brightness ? 0.35 : 0.7, 0.15, book.hue).css() + " 85%, " +
+                chroma.oklch(brightness ? 0.2 : 0.5, 0.10, book.hue).css() + " 100%)";
 
-            if (book.style)
+            switch (book.style)
             {
-                if (brightness)
-                {
-                    titleEl.style.background = "linear-gradient(180deg, " +
-                    chroma.oklch(brightness ? 0.5 : 0.95, 0.01, book.hue).css() + " 0%, " +
-                    chroma.oklch(brightness ? 0.3 : 0.75, 0.025, book.hue).css() + " 15%, " +
-                    chroma.oklch(brightness ? 0.20 : 0.68, 0.025, book.hue).css() + " 85%, " +
-                    chroma.oklch(brightness ? 0.05 : 0.5, 0.03, book.hue).css() + " 100%)";                
-                }
-                else
-                {
-                    authorEl.style.background = "linear-gradient(180deg, " +
-                    chroma.oklch(brightness ? 0.5 : 0.99, 0.01, book.hue).css() + " 0%, " +
-                    chroma.oklch(brightness ? 0.3 : 0.92, 0.02, book.hue).css() + " 15%, " +
-                    chroma.oklch(brightness ? 0.20 : 0.90, 0.02, book.hue).css() + " 85%, " +
-                    chroma.oklch(brightness ? 0.05 : 0.7, 0.02, book.hue).css() + " 100%)";  
-                }
-            }
-            else
-            {
-                if (brightness)
-                {
+                case 2:
+                    if (brightness)
+                    {
+                        bookEl.style.background = "linear-gradient(180deg, " +
+                        chroma.oklch(brightness ? 0.3 : 0.75, 0.01, book.hue).css() + " 0%, " +
+                        chroma.oklch(brightness ? 0.5 : 0.95, 0.01, book.hue).css() + " 5%, " +
+                        chroma.oklch(brightness ? 0.3 : 0.75, 0.025, book.hue).css() + " 15%, " +
+                        chroma.oklch(brightness ? 0.20 : 0.68, 0.025, book.hue).css() + " 90%, " +
+                        chroma.oklch(brightness ? 0.05 : 0.5, 0.03, book.hue).css() + " 100%)";  
 
-                }
-                else
-                {
-                    titleEl.style.color = chroma.oklch(0.93, 0.01, book.hue).css();
-                }
+                        titleEl.style.color = chroma.oklch(0.80, 0.2, book.hue).css();
+                        authorEl.style.color = chroma.oklch(0.96, 0.01, book.hue).css();
+                    }
+                    else
+                    {
+                        bookEl.style.background = "linear-gradient(180deg, " +
+                        chroma.oklch(brightness ? 0.3 : 0.82, 0.02, book.hue).css() + " 0%, " +
+                        chroma.oklch(brightness ? 0.5 : 0.99, 0.02, book.hue).css() + " 5%, " +
+                        chroma.oklch(brightness ? 0.3 : 0.92, 0.04, book.hue).css() + " 15%, " +
+                        chroma.oklch(brightness ? 0.20 : 0.85, 0.04, book.hue).css() + " 90%, " +
+                        chroma.oklch(brightness ? 0.05 : 0.65, 0.02, book.hue).css() + " 100%)";
+
+                        titleEl.style.color = chroma.oklch(0.3, 0.25, book.hue).css();
+                        authorEl.style.color = chroma.oklch(0.2, 0.01, book.hue).css();
+                    }
+                break;
+                case 1:
+                    if (brightness)
+                    {
+                        titleEl.style.background = "linear-gradient(180deg, " +
+                        chroma.oklch(brightness ? 0.3 : 0.75, 0.01, book.hue).css() + " 0%, " +
+                        chroma.oklch(brightness ? 0.5 : 0.95, 0.01, book.hue).css() + " 5%, " +
+                        chroma.oklch(brightness ? 0.3 : 0.75, 0.03, book.hue).css() + " 15%, " +
+                        chroma.oklch(brightness ? 0.20 : 0.68, 0.03, book.hue).css() + " 90%, " +
+                        chroma.oklch(brightness ? 0.05 : 0.5, 0.03, book.hue).css() + " 100%)";                
+                    }
+                    else
+                    {
+                        authorEl.style.background = "linear-gradient(180deg, " +
+                        chroma.oklch(brightness ? 0.3 : 0.82, 0.01, book.hue).css() + " 0%, " +
+                        chroma.oklch(brightness ? 0.5 : 0.99, 0.01, book.hue).css() + " 5%, " +
+                        chroma.oklch(brightness ? 0.3 : 0.92, 0.02, book.hue).css() + " 15%, " +
+                        chroma.oklch(brightness ? 0.20 : 0.85, 0.02, book.hue).css() + " 90%, " +
+                        chroma.oklch(brightness ? 0.05 : 0.7, 0.02, book.hue).css() + " 100%)";  
+                    }
+                    break;
+                case 0:
+                    if (brightness)
+                    {
+                        bookEl.style.color = chroma.oklch(0.82, 0.08, 90).css();
+                        authorEl.style.color = chroma.oklch(0.92, 0.02, book.hue).css();
+                        titleEl.style.fontWeight = "600";
+                    }
+                    else
+                    {
+                        bookEl.style.background = "linear-gradient(180deg, " +
+                            chroma.oklch(brightness ? 0.3 : 0.6, 0.10, book.hue).css() + " 0%, " +
+                            chroma.oklch(brightness ? 0.6 : 0.825, 0.15, book.hue).css() + " 5%, " +
+                            chroma.oklch(brightness ? 0.5 : 0.75, 0.15, book.hue).css() + " 15%, " +
+                            chroma.oklch(brightness ? 0.35 : 0.60, 0.15, book.hue).css() + " 90%, " +
+                            chroma.oklch(brightness ? 0.2 : 0.5, 0.10, book.hue).css() + " 100%)";
+                        titleEl.style.color = chroma.oklch(0.92, 0.01, book.hue).css();
+                    }
+                    break;
             }
 
             if (book.order == 0) {
@@ -1134,7 +1175,7 @@
                     title: pick(titles, i),
                     "hue": pick(hues, i),
                     "brightness": Math.floor(Math.random() * 2),
-                    "style": Math.floor(Math.random() * 2),
+                    "style": Math.floor(Math.random() * 3),
                     "order": Math.floor(Math.random() * 2),
                     "layout": Math.floor(Math.random() * 4),
                     width: pick(widths, i),
@@ -1323,7 +1364,7 @@
             selectedIndex = 0;
 
             createBooks();
-            books = reserve.splice(0, 7);
+            books = reserve.splice(0, 14);
             drawBooks();
             draw();
             highlightSelected();
