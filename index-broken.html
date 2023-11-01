@@ -25,30 +25,33 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            background-color: black;
         }
 
         #viewport {
             width: 100%;
-            height: 90vh;
+            height: 100vh;
             overflow: hidden;
             background-color: #868998;
         }
 
-        #level
-        {
-            margin-left: -3000px;
-            min-width: 6000px;
-            margin-top: -2000px;
-            min-height: 4000px;
+        #alert {
+            position: fixed;
+            top: 0px;
+            height: 100px;
+            width: 400px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 32px;
             display: flex;
-            flex-direction: row;
-            transform-origin: 50% 50%;
-            transform: translate(0, 0) scale(.25) rotate(90deg);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            visibility: hidden;
         }
 
         .book {
-            font-size: 32px;
+            font-size: 16px;
             background-color: darkred;
             color: white;
             display: flex;
@@ -56,30 +59,188 @@
             align-items: center;
         }
 
-        .shelf {
-            padding-left: 120px;
-            height: 4000px;
-            width: 1000px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
-            border-right: 40px solid aliceblue;
-            background: linear-gradient(90deg, rgba(3,0,10,0.3) 0%, rgba(3,0,10,0) 10%, rgba(3,0,10,0) 100%);
-        }
-
         .author,
         .title {
-            padding: 0 24px;
+            padding: 0 12px;
             height: 100%;
             display: flex;
             flex-direction: row;
             align-items: center;
         }
+
+        .selected {
+            box-shadow: 0px 0px 5px 5px rgb(255, 140, 0);
+            z-index: 100;
+        }
+
+        #hand .book {
+            box-shadow: 0px 0px 20px 15px rgba(0, 0, 0, 0.8)
+        }
+
+        .placeholder {
+            padding-left: 12px;
+            font-size: 20px;
+            background: rgba(0, 0, 20, 0.4) !important;
+            color: rgba(0, 0, 0, 0) !important;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .placeholder .author, .placeholder .title
+        {
+            color: rgba(0,0,0,0);
+            background: none !important;
+        }
+
+        #shelf {
+            margin-left: 24px;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-start;
+            border-right: 20px solid aliceblue;
+        }
+
+        #hand {
+            font-size: 50px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 100;
+            height: 100px;
+            width: 400px;
+            position: absolute;
+        }
     </style>
     <script>
 
-var titles = [
+        var achievements = [
+            {
+                "title": "Sorted by Author",
+                "reward": "+10 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].author.split(" ")[1] > books[i + 1].author.split(" ")[1]) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 10);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Size",
+                "reward": "+2 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].width > books[i + 1].width) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 2);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Size Descending",
+                "reward": "+2 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].width < books[i + 1].width) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 2);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Thickness",
+                "reward": "+5 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].height > books[i + 1].height) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 2);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Thickness Descending",
+                "reward": "+5 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].height < books[i + 1].height) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 5);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Hue",
+                "reward": "+10 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].hue > books[i + 1].hue) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 10);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            },
+            {
+                "title": "Sorted by Hue Descending",
+                "reward": "+10 books",
+                "check": () => {
+                    var sorted = true;
+                    for (var i = 0; i < books.length - 2; i++) {
+                        if (books[i].hue < books[i + 1].hue) {
+                            sorted = false;
+                        }
+                    }
+                    return sorted;
+                },
+                "finished": () => {
+                    var newbooks = reserve.splice(0, 10);
+                    newbooks.forEach((book) => { books.push(book); });
+                }
+            }
+        ];
+
+        var titles = [
             "Selected Verse",
             "Collected Works",
             "Complete Poems",
@@ -875,49 +1036,28 @@ var titles = [
             return str.join(' ');
         }
 
-        var reserve = [];
-        var shelves = [];
+        function getDomIndex(target) {
+            return [].slice.call(target.parentNode.children).indexOf(target)
+        }
 
+        var viewheight = window.innerHeight;
+        var viewCentre = window.innerHeight / 2;
+        var level;
+        var shelf;
+        var hand;
+        var handEl;
+        var selectedIndex = 0;
+        var handIndex = 0;
+        var camerapos = 0.0;
+        var handheight = 0;
+        var cameraVelocity = 0.0;
+        var frictionRatio = 0.4;
+
+        var reserve = [];
+        var books = [];
         var hues = [120, 143, 166, 206, 270, 300, 324, 348, 30, 90];
         var widths = [300, 314, 322, 330, 339, 351, 362, 373, 381, 389, 400];
         var heights = [46, 52, 56, 61, 69, 74, 81];
-
-        function createBooks() {
-
-            shuffle(widths);
-            shuffle(heights);
-            shuffle(hues);
-            shuffle(titles);
-
-            shuffle(names["given-names"].negative);
-            names["given-names"].negative = names["given-names"].negative.map((el) => titleCase(el));
-            shuffle(names["given-names"].standard);
-            names["given-names"].standard = names["given-names"].standard.map((el) => titleCase(el));
-            shuffle(names["family-names"].negative);
-            names["family-names"].negative = names["family-names"].negative.map((el) => titleCase(el));
-            shuffle(names["family-names"].frequent);
-            names["family-names"].frequent = names["family-names"].frequent.map((el) => titleCase(el));
-
-            for (var i = 0; i < 200; i++) {
-                var given = (i % 2 == 0) ? pick(names["given-names"].negative, i / 2) : pick(names["given-names"].standard, Math.floor(i / 2));
-                var family = (i % 2 == 0) ? pick(names["family-names"].frequent, i / 2) : pick(names["family-names"].negative, Math.floor(i / 2));
-
-                var thisBook = {
-                    "author": given + " " + family,
-                    title: pick(titles, i),
-                    "hue": pick(hues, i),
-                    "brightness": Math.floor(Math.random() * 2),
-                    "style": Math.floor(Math.random() * 3),
-                    "order": Math.floor(Math.random() * 2),
-                    "layout": Math.floor(Math.random() * 4),
-                    width: (pick(widths, i) * 2) + 200,
-                    height: pick(heights, i) * 2
-                };
-                reserve.push(
-                    thisBook
-                );
-            }
-        }
 
         function drawBook(book) {
             var authorEl = document.createElement("div");
@@ -930,7 +1070,6 @@ var titles = [
             bookEl.classList.add("book");
             bookEl.style.width = "" + book.width + "px";
             bookEl.style.height = "" + book.height + "px";
-            bookEl.style.minHeight = "" + book.height + "px";
 
             switch (book.layout) {
                 case 0: bookEl.style.justifyContent = "space-between"; break;
@@ -946,10 +1085,10 @@ var titles = [
             if (brightness) { titleEl.style.fontVariantCaps = "small-caps"; } else { titleEl.style.fontWeight = 600; }
             bookEl.style.background = "linear-gradient(180deg, " +
                 chroma.oklch(brightness ? 0.3 : 0.7, 0.10, book.hue).css() + " 0%, " +
-                chroma.oklch(brightness ? 0.6 : 0.95, brightness ? 0.15 : 0.1, book.hue).css() + " 5%, " +
-                chroma.oklch(brightness ? 0.5 : 0.9, brightness ? 0.15 : 0.1, book.hue).css() + " 15%, " +
-                chroma.oklch(brightness ? 0.35 : 0.8, brightness ? 0.15 : 0.1, book.hue).css() + " 85%, " +
-                chroma.oklch(brightness ? 0.2 : 0.7, 0.10, book.hue).css() + " 100%)";
+                chroma.oklch(brightness ? 0.6 : 0.95, 0.15, book.hue).css() + " 5%, " +
+                chroma.oklch(brightness ? 0.5 : 0.85, 0.15, book.hue).css() + " 15%, " +
+                chroma.oklch(brightness ? 0.35 : 0.7, 0.15, book.hue).css() + " 85%, " +
+                chroma.oklch(brightness ? 0.2 : 0.5, 0.10, book.hue).css() + " 100%)";
 
             switch (book.style)
             {
@@ -1030,85 +1169,325 @@ var titles = [
             return bookEl;
         }
 
-        function drawBooks() {
-            
-            var levelEl = document.getElementById("level");
-            levelEl.innerHTML = "";
-            for (var thisShelf of shelves)
-            {
-                var shelfEl = document.createElement("div");
-                shelfEl.classList.add("shelf");
-                levelEl.appendChild(shelfEl);
+        function createBooks() {
+            for (var i = 0; i < 200; i++) {
+                var given = (i % 2 == 0) ? pick(names["given-names"].negative, i / 2) : pick(names["given-names"].standard, Math.floor(i / 2));
+                var family = (i % 2 == 0) ? pick(names["family-names"].frequent, i / 2) : pick(names["family-names"].negative, Math.floor(i / 2));
 
-                for (var thisBook of thisShelf) {
-                    var bookEl = drawBook(thisBook);
-                    shelfEl.appendChild(bookEl);
+                var thisBook = {
+                    "author": given + " " + family,
+                    title: pick(titles, i),
+                    "hue": pick(hues, i),
+                    "brightness": Math.floor(Math.random() * 2),
+                    "style": Math.floor(Math.random() * 3),
+                    "order": Math.floor(Math.random() * 2),
+                    "layout": Math.floor(Math.random() * 4),
+                    width: pick(widths, i),
+                    height: pick(heights, i)
+                };
+                reserve.push(
+                    thisBook
+                );
+            }
+        }
+
+        function drawBooks() {
+            handEl.innerHTML = "";
+            shelf.innerHTML = "";
+
+            for (var thisBook of books) {
+                var bookEl = drawBook(thisBook);
+                shelf.appendChild(bookEl);
+            }
+        }
+
+        var buttonTimeout = 100;
+        var buttonLastPressed = {};
+
+
+        function draw() {
+
+            if (gp) {
+                //console.log(gp.buttons)
+                for (var button in navigator.getGamepads()[0].buttons) {
+                    if (button.pressed) {
+                        console.log("BUTTON");
+                    }
+                }
+
+                // check the buttons to see if we're meant to be doing anything
+                if (navigator.getGamepads()[0].buttons[12].pressed && (!buttonLastPressed[12] || buttonLastPressed[12] < (performance.now() - buttonTimeout))) {
+                    buttonLastPressed[12] = performance.now();
+                    down();
+                }
+                if (navigator.getGamepads()[0].buttons[13].pressed && (!buttonLastPressed[13] || buttonLastPressed[13] < (performance.now() - buttonTimeout))) {
+                    buttonLastPressed[13] = performance.now();
+                    up();
+                }
+                if (navigator.getGamepads()[0].buttons[0].pressed && (!buttonLastPressed[0] || buttonLastPressed[0] < (performance.now() - buttonTimeout))) {
+                    buttonLastPressed[0] = performance.now();
+                    grab();
                 }
             }
+
+            viewheight = window.innerHeight;
+            viewCentre = viewheight / 2;
+
+            var bookCentre = books.slice(0, selectedIndex).reduce((prev, book) => prev + book.height, 0);
+
+            if (hand) {
+                // Center the gap where the book would get inserted
+                if (selectedIndex == handIndex) {
+                    // The book appears in the centre of the placeholder gap
+                    bookCentre = bookCentre + (books[selectedIndex].height / 2);
+                }
+                else if (selectedIndex > handIndex) {
+                    // Insert the book *after* the selected book
+                    bookCentre = bookCentre + books[selectedIndex].height;
+                }
+                else {
+                    // Insert the book *before* the selected book
+                    // We need do nothing
+                }
+            }
+            else {
+                // Centre the selected book
+                bookCentre = bookCentre + (books[selectedIndex].height / 2);
+            }
+
+            // try and seek towards the right position
+            var target = viewCentre - bookCentre;
+
+            cameraVelocity = ((target - camerapos) * 0.4);
+
+            camerapos = camerapos + cameraVelocity;
+            level.style.transform = "translate(0, " + camerapos + "px)";
+
+            if (hand) { handheight = handheight + ((200 - handheight) * 0.3); } else { handheight = 0; }
+            var handScale = 1 + ((handheight / 150) * 0.2);
+            handEl.style.transform = "translate(" + handheight + "px, " + (viewCentre - 50) + "px) scale(" + handScale + ")";
         }
 
-        var elapsed = 0;
-        var tapped = false;
+        function highlightSelected() {
+            var selected = document.querySelector(".selected");
+            if (selected) { selected.classList.remove("selected"); }
 
-        function frame()
-        {
-            var viewwidth = window.innerWidth;
-            var viewheight = window.innerHeight;
-            if (elapsed < 2000)
-            {
-                document.getElementById("level").style.transform = "translate(" + (viewwidth / 2) + "px, " + (viewheight / 2) + "px) scale(" + (0.25 + (Math.sin((elapsed / 2000) * (Math.PI/2))*0.25)) + ") rotate(" + (Math.cos((elapsed / 2000) * (Math.PI/2))*90) + "deg)";
+            if (!hand) {
+                var bookEls = document.querySelectorAll("#shelf .book");
+                bookEls[selectedIndex].classList.add("selected");
             }
-            else
-            {
-                document.getElementById("level").style.transform = "translate(" + (viewwidth / 2) + "px, " + (viewheight / 2) + "px) scale(0.5) rotate(0deg)";   
-            }
-            if (tapped) { elapsed += 20; }
         }
 
-        function start()
-        {
-            document.onclick = function(e){ 
-                tapped = true;
-                e.preventDefault(); 
-                e.stopPropagation();
-            }
+        var gp = null;
 
-            document.ontouchstart = function(e){ 
-                tapped = true;
-                e.preventDefault(); 
-                e.stopPropagation();
+        function up() {
+            if (selectedIndex < books.length - 1) {
+                selectedIndex++;
+                highlightSelected();
             }
+        }
 
-            document.ontouchend = function(e){ 
-                tapped = true;
-                e.preventDefault(); 
-                e.stopPropagation();
+        function down() {
+            if (selectedIndex > 0) {
+                selectedIndex--;
+                highlightSelected();
             }
+        }
 
-            document.ontouchmove = function(e){ 
-                tapped = true;
-                e.preventDefault(); 
-                e.stopPropagation();
+        function grab() {
+            console.log("fnord");
+            if (hand) {
+                // put the book down
+                books.splice(handIndex, 1);
+                books.splice(selectedIndex, 0, hand);
+                hand = null;
+
+                drawBooks();
+                draw();
+                highlightSelected();
+
+                // Check if it is sorted!
+                for (var achievement of achievements) {
+                    if (achievement.check()) {
+                        console.log("sorted!");
+                        console.log("Got " + achievement.title);
+
+                        var congratsEl = document.getElementById("alert");
+                        congratsEl.style.visibility = "visible";
+                        congratsEl.innerText = achievement.title + ": " + achievement.reward;
+                        achievement.finished();
+                        drawBooks();
+                        draw();
+                        highlightSelected();
+                        setTimeout(() => {
+                            document.getElementById("alert").style.visibility = "hidden";
+                        }, 5000);
+                    }
+                }
             }
+            else {
+                hand = books[selectedIndex];
+                handIndex = selectedIndex;
+                var bookEls = document.querySelectorAll("#shelf .book");
+                bookEls[selectedIndex].classList.add("placeholder");
+
+                handEl.appendChild(drawBook(hand));
+                highlightSelected();
+            }
+        }
+
+        function start() {
+
+            // set up controller support
+            window.addEventListener("gamepadconnected", function (e) {
+                gp = navigator.getGamepads()[e.gamepad.index];
+                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                    gp.index, gp.id,
+                    gp.buttons.length, gp.axes.length);
+            });
+
+            shuffle(widths);
+            shuffle(heights);
+            shuffle(hues);
+            shuffle(titles);
+
+            shuffle(names["given-names"].negative);
+            names["given-names"].negative = names["given-names"].negative.map((el) => titleCase(el));
+            shuffle(names["given-names"].standard);
+            names["given-names"].standard = names["given-names"].standard.map((el) => titleCase(el));
+            shuffle(names["family-names"].negative);
+            names["family-names"].negative = names["family-names"].negative.map((el) => titleCase(el));
+            shuffle(names["family-names"].frequent);
+            names["family-names"].frequent = names["family-names"].frequent.map((el) => titleCase(el));
+
+            level = document.getElementById("level");
+            shelf = document.getElementById("shelf");
+            handEl = document.querySelector("#hand");
+            viewheight = window.innerHeight;
+
+            selectedIndex = 0;
 
             createBooks();
-            shelves.push(reserve.splice(0, 25));
-            shelves.push(reserve.splice(0, 15));
-            shelves.push(reserve.splice(0, 9));
-            shelves.push(reserve.splice(0, 18));
-            shelves.push(reserve.splice(0, 22));
-            drawBooks();  
-            
-            window.setInterval(() => { frame(); }, 20);
-        }
+            books = reserve.splice(0, 14);
+            drawBooks();
+            draw();
+            highlightSelected();
 
-        
+            window.addEventListener('keydown', function (e) {
+                switch (e.keyCode) {
+                    case 40:
+                        up();
+                        break;
+                    case 38:
+                        down();
+                        break;
+                    case 37:
+                    case 39:
+                    case 13:
+                        grab();
+                        break;
+                    default:
+                        console.log(e.keyCode);
+                        break;
+                }
+            });
+
+            window.addEventListener('mousemove', function (e) {
+                if (hand) {
+                    // if user starts dragging, how do we handle that?
+                }
+            });
+
+            window.addEventListener('mousedown', function (e) {
+                var location = e.clientY;
+
+                if ((e.target.parentElement && e.target.parentElement.id == "hand") || (e.target.parentElement && e.target.parentElement.parentElement && e.target.parentElement.parentElement.id == "hand")) {
+                    console.log("clicked on book in hand");
+                    grab();
+                } else if (e.target.classList.contains("book") || (e.target.parentElement && e.target.parentElement.classList.contains("book"))) {
+
+                    var index = 0;
+                    if (e.target.classList.contains("book")) {
+                        console.log(e.target);
+                        console.log(getDomIndex(e.target));
+                        index = getDomIndex(e.target);
+                    }
+                    else if (e.target.parentElement.classList.contains("book")) {
+                        console.log(e.target.parentElement);
+                        console.log(getDomIndex(e.target.parentElement));
+                        index = getDomIndex(e.target.parentElement);
+                    }
+                    if (selectedIndex != index) {
+                        console.log("moving to " + index);
+                        selectedIndex = index;
+                        if (!hand) {
+                            grab();
+                        }
+                        else {
+                            draw();
+                            highlightSelected();
+                        }
+                    }
+                    else {
+                        console.log("clicked selected item");
+                        grab();
+                    }
+                }
+                else {
+                    if (location < viewCentre - 50) {
+                        down();
+                    }
+                    else if (location > viewCentre + 50) {
+                        up();
+                    }
+                    else {
+                        grab();
+                    }
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            // window.addEventListener('touchstart', function (e) {
+            //     console.log(e);
+            //     if (e.changedTouches.length > 0)
+            //     {
+            //         var location = e.changedTouches[0].clientY;
+            //         if (location < viewCentre - 50)
+            //         {
+            //             down();
+            //         }
+            //         else if (location > viewCentre + 50)
+            //         {
+            //             up();
+            //         }
+            //         else
+            //         {
+            //             grab();
+            //         }
+            //         e.preventDefault();
+            //         e.stopPropagation();
+            //     }
+            // })
+
+            window.setInterval(() => { draw(); }, 20);
+        }
     </script>
 </head>
 
 <body onload="start()">
     <div id="viewport">
+        <div id="alert">
+            <p>Sorted by author: +5 books</p>
+        </div>
+        <div id="hand">
+
+        </div>
         <div id="level">
+            <div id="shelf">
+
+            </div>
         </div>
     </div>
 </body>
